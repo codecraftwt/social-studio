@@ -41,7 +41,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/header/create', [HeaderController::class, 'create'])->name('header.create');
     Route::post('/header/save', [HeaderController::class, 'save'])->name('header.save');
     Route::post('/header/saveFooter', [HeaderController::class, 'saveFooter'])->name('header.saveFooter');
-
 });
 
 Route::post('/download-record', [DownloadRecordController::class, 'store'])->name('download.record');

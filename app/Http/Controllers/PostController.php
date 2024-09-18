@@ -37,15 +37,18 @@ class PostController extends Controller
         $postData = $request->all();
 
         if ($request->hasFile('post_image')) {
-            // $postData['post_image'] = $request->file('post_image')->store('post_images', 'public');
-            $postData['post_image'] = $request->file('post_image')->store('app/public/post_images', 'public');
-
+            // Store the image file and get the file name
+            $image = $request->file('post_image');
+            $imageName = time() . '_' . $image->getClientOriginalName(); // Unique file name
+            $image->storeAs('public/post_images', $imageName); // Save the file in the storage
+            $postData['post_image'] = $imageName; // Save the file name in the database
         }
 
         Post::create($postData);
 
         return redirect()->route('posts.index')->with('success', 'Post added successfully.');
     }
+
 
     public function edit(Post $post)
     {
@@ -74,6 +77,30 @@ class PostController extends Controller
     //     return redirect()->route('posts.index')->with('success', 'Post updated successfully.');
     // }
 
+    // public function update(Request $request, Post $post)
+    // {
+    //     $request->validate([
+    //         'post_title' => 'required|max:255',
+    //         'post_explanation' => 'required',
+    //         'link' => 'nullable|url',
+    //         'category_id' => 'required|exists:categories,id',
+    //         'post_image' => 'nullable|image|mimes:jpg,png,jpeg,gif|max:2048',
+    //     ]);
+
+    //     $postData = $request->except('post_image');
+
+    //     if ($request->hasFile('post_image')) {
+    //         $postData['post_image'] = $request->file('post_image')->store('post_images', 'public');
+    //     }
+
+    //     $post->update($postData);
+
+    //     if ($request->ajax()) {
+    //         return response()->json(['success' => true]);
+    //     }
+
+    //     return redirect()->route('posts.index')->with('success', 'Post updated successfully.');
+    // }
     public function update(Request $request, Post $post)
     {
         $request->validate([
@@ -83,28 +110,40 @@ class PostController extends Controller
             'category_id' => 'required|exists:categories,id',
             'post_image' => 'nullable|image|mimes:jpg,png,jpeg,gif|max:2048',
         ]);
-    
+
         $postData = $request->except('post_image');
-    
+
         if ($request->hasFile('post_image')) {
+            // Delete the old image if necessary
+            if ($post->post_image) {
+                Storage::disk('public')->delete('post_images/' . $post->post_image);
+            }
+
             $postData['post_image'] = $request->file('post_image')->store('post_images', 'public');
         }
-    
+
         $post->update($postData);
-    
+
         if ($request->ajax()) {
             return response()->json(['success' => true]);
         }
-    
+
         return redirect()->route('posts.index')->with('success', 'Post updated successfully.');
     }
-    
+
+
 
     public function destroy(Post $post)
     {
         $post->delete();
+
+        if (request()->ajax()) {
+            return response()->json(['success' => true]);
+        }
+
         return redirect()->route('posts.index')->with('success', 'Post deleted successfully.');
     }
+
 
     public function bulkDelete(Request $request)
     {
