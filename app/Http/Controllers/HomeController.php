@@ -31,7 +31,7 @@ class HomeController extends Controller
 
         if (auth()->check()) {
             return view('home', compact('categories'));
-        }else{
+        } else {
             return redirect()->route('login')->with('error', 'You need to log in to access the dashboard.');
         }
     }
@@ -52,27 +52,32 @@ class HomeController extends Controller
 
     public function getPostsByCategory(Request $request)
     {
-        // $categoryId = $request->input('category_id');
-        // $posts = Post::where('category_id', $categoryId)->get();
+        // Validate the request input
+        $request->validate([
+            'category_id' => 'required|integer|exists:categories,id',
+        ]);
 
-        // return response()->json($posts);
+        $categoryId = $request->input('category_id');
+        $userId = auth()->id(); // Get the logged-in user ID
 
-         $categoryId = $request->input('category_id');
-    $userId = auth()->id(); // Get the logged-in user ID
+        // Retrieve the posts
+        $posts = Post::where('category_id', $categoryId)->get();
 
-    // Retrieve the posts
-    $posts = Post::where('category_id', $categoryId)->get();
+        // Retrieve header and footer paths
+        $headerFooter = HeaderFooter::where('user_id', $userId)->first();
 
-    // Retrieve header and footer paths
-    $headerFooter = HeaderFooter::where('user_id', $userId)->first();
-    
+        // Check if header/footer paths exist
+        $headerPath = $headerFooter ? $headerFooter->header_path : null;
+        $footerPath = $headerFooter ? $headerFooter->footer_path : null;
 
-    // Return posts and header/footer paths
-    return response()->json([
-        'posts' => $posts,
-        'headerPath' => $headerFooter ? $headerFooter->header_path : null,
-        'footerPath' => $headerFooter ? $headerFooter->footer_path : null,
-    ]);
+        // Return posts and header/footer paths
+        return response()->json([
+            'posts' => $posts->map(function ($post) {
+                $post->image_url = $post->image_path ? asset('storage/post_images/' . $post->image_path) : null;
+                return $post;
+            }),
+            'headerPath' => $headerPath ? asset('storage/' . $headerPath) : null,
+            'footerPath' => $footerPath ? asset('storage/' . $footerPath) : null,
+        ]);
     }
-
 }

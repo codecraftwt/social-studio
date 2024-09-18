@@ -17,17 +17,19 @@
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th><input type="checkbox" id="select-all"></th>
-                    <th>#</th>
+                    <th><input type="checkbox" id="select-all">
+                    </th>
+                    <th>SR NO</th>
                     <th>Name</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
+                @php $serialNumber = 1; @endphp
                 @foreach ($categories as $category)
                     <tr>
                         <td><input type="checkbox" name="categories[]" value="{{ $category->id }}"></td>
-                        <td>{{ $category->id }}</td>
+                        <td>{{ $serialNumber++ }}</td> <!-- Increment serial number here -->
                         <td>{{ $category->name }}</td>
                         <td>
                             <!-- Edit Button -->
