@@ -1,7 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
+
+
+<div class="container mt-4">
     <h2>Categories</h2>
 
     <!-- Display success message -->
@@ -12,9 +14,9 @@
     @endif
 
     <!-- Bulk Delete Form -->
-    <form action="{{ route('categories.bulkDelete') }}" method="POST" >
+    <form action="{{ route('categories.bulkDelete') }}" method="POST" class="mt-4">
         @csrf
-        <table class="table table-striped">
+        <table id="categoriesTable" class="table table-striped table-bordered">
             <thead>
                 <tr>
                     <th><input type="checkbox" id="select-all"></th>
@@ -30,15 +32,7 @@
                         <td>{{ $category->id }}</td>
                         <td>{{ $category->name }}</td>
                         <td>
-                            <!-- Edit Button -->
                             <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editCategoryModal" data-id="{{ $category->id }}" data-name="{{ $category->name }}">Edit</button>
-
-                            <!-- Delete Form -->
-                            <!-- <form action="{{ route('categories.destroy', $category->id) }}" method="POST" style="display:inline;">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                            </form> -->
                             <button type="button" class="btn btn-danger btn-sm delete-btn" data-id="{{ $category->id }}">Delete</button>
                         </td>
                     </tr>
@@ -76,49 +70,54 @@
 </div>
 
 <script>
+    $(document).ready(function() {
+        // Initialize DataTable
+        var table = $('#categoriesTable').DataTable();
 
-    document.querySelectorAll('.delete-btn').forEach(button => {
-        button.addEventListener('click', function() {
-            const categoryId = this.getAttribute('data-id');
-            if (confirm('Are you sure you want to delete this category?')) {
-                fetch(`/categories/${categoryId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        location.reload(); // Reload the page to reflect the changes
-                    } else {
-                        alert('An error occurred while deleting the category.');
-                    }
-                })
-                .catch(error => {
-                    alert('An error occurred: ' + error.message);
-                });
-            }
+        // Handle delete button functionality
+        document.querySelectorAll('.delete-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const categoryId = this.getAttribute('data-id');
+                if (confirm('Are you sure you want to delete this category?')) {
+                    fetch(`/categories/${categoryId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            location.reload(); // Reload the page to reflect the changes
+                        } else {
+                            alert('An error occurred while deleting the category.');
+                        }
+                    })
+                    .catch(error => {
+                        alert('An error occurred: ' + error.message);
+                    });
+                }
+            });
         });
-    });
 
-    // JavaScript to populate the modal with category data
-    var editModal = document.getElementById('editCategoryModal');
-    editModal.addEventListener('show.bs.modal', function (event) {
-        var button = event.relatedTarget;
-        var id = button.getAttribute('data-id');
-        var name = button.getAttribute('data-name');
+        // Populate modal with category data
+        var editModal = document.getElementById('editCategoryModal');
+        editModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            var id = button.getAttribute('data-id');
+            var name = button.getAttribute('data-name');
 
-        var modalForm = document.getElementById('editCategoryForm');
-        modalForm.action = '/categories/' + id; // Update form action
-        modalForm.querySelector('#edit-name').value = name; // Set the name field value
-    });
+            var modalForm = document.getElementById('editCategoryForm');
+            modalForm.action = '/categories/' + id; // Update form action
+            modalForm.querySelector('#edit-name').value = name; // Set the name field value
+        });
 
-    // JavaScript to handle "select all" functionality
-    document.getElementById('select-all').addEventListener('click', function() {
-        var checkboxes = document.querySelectorAll('input[name="categories[]"]');
-        checkboxes.forEach(checkbox => checkbox.checked = this.checked);
+        // Handle "select all" functionality
+        document.getElementById('select-all').addEventListener('click', function() {
+            var checkboxes = document.querySelectorAll('input[name="categories[]"]');
+            checkboxes.forEach(checkbox => checkbox.checked = this.checked);
+        });
     });
 </script>
 @endsection

@@ -1,126 +1,6 @@
 @extends('layouts.app')
 
 @section('content')
-<style>
-    .containerb {
-        max-width: 1200px;
-        margin: auto;
-        padding: 20px;
-    }
-
-    h1 {
-        text-align: center;
-        margin-bottom: 20px;
-        font-size: 24px;
-        color: #333;
-    }
-
-    .form-group {
-        margin-bottom: 20px;
-    }
-
-    .form-group label {
-        display: block;
-        margin-bottom: 8px;
-        font-weight: bold;
-    }
-
-    .form-group input, 
-    .form-group select {
-        width: 100%;
-        padding: 8px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-    }
-
-    .form-group input[type="number"] {
-        -moz-appearance: textfield; /* Remove spin buttons in Firefox */
-    }
-
-    .form-group input[type="color"] {
-        padding: 0;
-        border: none;
-        width: 40px;
-    }
-
-    .form-group .icon-preview, 
-    .form-group .logo-preview {
-        display: inline-block;
-        width: 24px;
-        height: 24px;
-        background-size: contain;
-        background-repeat: no-repeat;
-        background-position: center;
-    }
-
-    .form-group .hidden {
-        display: none;
-    }
-
-    #header, #footer {
-        margin-top: 20px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 10px;
-        background-color: #007bff;
-        color: #ffffff;
-        position: relative;
-        overflow: hidden;
-        /* border-radius: 8px; */
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    #header .title, #footer .title {
-        flex-grow: 1;
-        text-align: center;
-        font-size: 18px;
-        font-weight: bold;
-    }
-
-    #header .logo, #footer .logo {
-        width: 50px;
-        height: 50px;
-        background-size: contain;
-        background-repeat: no-repeat;
-        background-position: center;
-    }
-
-    #header, #footer .icon {
-        font-size: 24px;
-    }
-
-    .button-containerb {
-        text-align: center;
-        margin-top: 20px;
-    }
-
-    .button-containerb button {
-        padding: 10px 20px;
-        font-size: 16px;
-        color: #fff;
-        background-color: #007bff;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-    }
-
-    .button-containerb button:hover {
-        background-color: #0056b3;
-    }
-
-    @media (max-width: 768px) {
-        #header , #footer {
-            flex-direction: column;
-            align-items: flex-start;
-        }
-
-        #header  .title, #footer .title {
-            font-size: 16px;
-        }
-    }
-</style>
 
 <div class="containerb">
     <h1>Customize Your Header or Footer</h1>
@@ -211,15 +91,15 @@
                 </select>
             </div>
 
-            <div class="form-group">
-                <label for="header-width">Header Width (px):</label>
-                <input type="number" id="header-width" value="800" min="100">
+            <!-- <div class="form-group">
+                <label for="fixed-header-width">Header Width (px):</label>
+                <input type="number" id="fixed-header-width" value="800" min="100">
             </div>
 
             <div class="form-group">
                 <label for="header-height">Header Height (px):</label>
                 <input type="number" id="header-height" value="100" min="50">
-            </div>
+            </div> -->
 
             <div class="button-containerb">
                 <button type="button" id="generate-header">Generate Header</button>
@@ -303,15 +183,15 @@
                 </select>
             </div>
 
-            <div class="form-group">
-                <label for="footer-width">Footer Width (px):</label>
-                <input type="number" id="footer-width" value="800" min="100">
-            </div>
-
-            <div class="form-group">
+            <!-- <div class="form-group">
                 <label for="footer-height">Footer Height (px):</label>
                 <input type="number" id="footer-height" value="100" min="50">
             </div>
+
+            <div class="form-group">
+                <label for="fixed-footer-width">Footer Width (px):</label>
+                <input type="number" id="fixed-footer-width" value="800" min="100">
+            </div> -->
 
             <div class="button-containerb">
                 <button type="button" id="generate-footer">Generate Footer</button>
@@ -336,6 +216,14 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
     // Handle selection between header and footer
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('header-customization').style.display = 'block';
+        document.getElementById('footer-customization').style.display = 'none';
+        document.getElementById('header').style.display = 'flex';
+        document.getElementById('footer').style.display = 'none';
+    });
+
+    // Handle selection between header and footer
     document.getElementById('customize-select').addEventListener('change', function() {
         var value = this.value;
         if (value === 'header') {
@@ -351,6 +239,8 @@
         }
     });
 
+    const FIXED_HEADER_WIDTH = 640; // Fixed width for header
+    const FIXED_FOOTER_WIDTH = 640; 
     // Generate header
     document.getElementById('generate-header').addEventListener('click', function() {
         var headerText = document.getElementById('header-text').value;
@@ -361,8 +251,8 @@
         var fontWeight = document.getElementById('font-weight').value;
         var textAlign = document.getElementById('text-align').value;
         var logoPosition = document.getElementById('logo-position').value;
-        var headerWidth = document.getElementById('header-width').value;
-        var headerHeight = document.getElementById('header-height').value;
+        var fixedHeaderWidth = FIXED_HEADER_WIDTH;
+        var headerHeight = 150;
 
         document.getElementById('header-title').textContent = headerText;
         document.getElementById('header').style.backgroundColor = backgroundColor;
@@ -372,7 +262,7 @@
         document.getElementById('header-title').style.fontWeight = fontWeight;
         document.getElementById('header-title').style.textAlign = textAlign;
 
-        document.getElementById('header').style.width = headerWidth + 'px';
+        document.getElementById('header').style.width = fixedHeaderWidth + 'px';
         document.getElementById('header').style.height = headerHeight + 'px';
 
         if (logoPosition === 'left') {
@@ -425,15 +315,15 @@
         var textColor = document.getElementById('footer-text-color').value;
         var icon = document.getElementById('footer-icon').value;
         var logoPosition = document.getElementById('footer-logo-position').value;
-        var footerWidth = document.getElementById('footer-width').value;
-        var footerHeight = document.getElementById('footer-height').value;
+        var fixedFooterWidth = FIXED_FOOTER_WIDTH;
+        var footerHeight = 150;
 
         document.getElementById('footer-title').textContent = footerText;
         document.getElementById('footer').style.backgroundColor = backgroundColor;
         document.getElementById('footer').style.color = textColor;
         document.getElementById('footer-icon').textContent = icon;
 
-        document.getElementById('footer').style.width = footerWidth + 'px';
+        document.getElementById('footer').style.width = fixedFooterWidth + 'px';
         document.getElementById('footer').style.height = footerHeight + 'px';
 
         if (logoPosition === 'left') {

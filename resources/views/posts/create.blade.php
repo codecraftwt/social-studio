@@ -4,7 +4,7 @@
 <div class="container">
     <h2>Add Post</h2>
 
-    <form action="{{ route('posts.store') }}" method="POST" enctype="multipart/form-data">
+    <form action="{{ route('posts.store') }}" method="POST" enctype="multipart/form-data" id="postForm">
         @csrf
         <div class="mb-3">
             <label for="link" class="form-label">Link</label>
@@ -15,7 +15,7 @@
         </div>
         <div class="mb-3">
             <label for="post_image" class="form-label">Post Image</label>
-            <input type="file" class="form-control @error('post_image') is-invalid @enderror" id="post_image" name="post_image">
+            <input type="file" class="form-control @error('post_image') is-invalid @enderror" id="post_image" name="post_image" accept="image/*" onchange="previewAndResizeImage(event)">
             @error('post_image')
                 <div class="invalid-feedback">{{ $message }}</div>
             @enderror
@@ -50,5 +50,35 @@
         </div>
         <button type="submit" class="btn btn-primary">Add Post</button>
     </form>
+
+    <canvas id="canvas" style="display:none;"></canvas>
 </div>
+
+<script>
+function previewAndResizeImage(event) {
+    const file = event.target.files[0];
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    const img = new Image();
+    img.onload = function() {
+        const width = 800; // Desired width
+        const height = 600; // Desired height
+
+        canvas.width = width;
+        canvas.height = height;
+
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Convert canvas to Blob
+        canvas.toBlob(function(blob) {
+            const newFile = new File([blob], file.name, { type: file.type });
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(newFile);
+            document.getElementById('post_image').files = dataTransfer.files;
+        }, file.type);
+    };
+    img.src = URL.createObjectURL(file);
+}
+</script>
 @endsection

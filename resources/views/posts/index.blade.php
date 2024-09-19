@@ -1,23 +1,22 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
-<div id="successMessage" class="alert alert-success d-none" role="alert">
-    Post updated successfully!
-</div>
+
+<div class="container mt-4">
+    <div id="successMessage" class="alert alert-success d-none" role="alert">
+        Post updated successfully!
+    </div>
     <h2>Posts</h2>
 
-    <!-- Display success message -->
     @if (session('success'))
         <div class="alert alert-success">
             {{ session('success') }}
         </div>
     @endif
 
-    <!-- Bulk Delete Form -->
-    <form action="{{ route('posts.bulkDelete') }}" method="POST">
+    <form action="{{ route('posts.bulkDelete') }}" method="POST" class="mt-4">
         @csrf
-        <table id="postsTable" class="table table-striped">
+        <table id="postsTable" class="table table-striped table-bordered mt-5">
             <thead>
                 <tr>
                     <th><input type="checkbox" id="select-all"></th>
@@ -27,6 +26,15 @@
                     <th>Link</th>
                     <th>Image</th>
                     <th>Actions</th>
+                </tr>
+                <tr>
+                    <th></th>
+                    <th></th>
+                    <th><input type="text" placeholder="Search Title" class="form-control" /></th>
+                    <th><input type="text" placeholder="Search Category" class="form-control" /></th>
+                    <th><input type="text" placeholder="Search Link" class="form-control" /></th>
+                    <th></th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -51,10 +59,7 @@
                             @endif
                         </td>
                         <td>
-                            <!-- Edit Button -->
-                            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editPostModal" data-id="{{ $post->id }}" data-title="{{ $post->post_title }}" data-link="{{ $post->link }}" data-category="{{ $post->category_id }}">Edit</button>
-
-                            <!-- Delete Button -->
+                            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editPostModal" data-id="{{ $post->id }}" data-title="{{ $post->post_title }}" data-link="{{ $post->link }}" data-category="{{ $post->category_id }}" data-image="{{ $post->post_image }}">Edit</button>
                             <button type="button" class="btn btn-danger btn-sm delete-btn" data-id="{{ $post->id }}">Delete</button>
                         </td>
                     </tr>
@@ -83,7 +88,7 @@
                     </div>
                     <div class="mb-3">
                         <label for="edit-explanation" class="form-label">Explanation</label>
-                        <textarea class="form-control" id="edit-explanation" name="post_explanation" rows="3">{{ $post->post_explanation }}</textarea>
+                        <textarea class="form-control" id="edit-explanation" name="post_explanation" rows="3"></textarea>
                     </div>
                     <div class="mb-3">
                         <label for="edit-link" class="form-label">Link</label>
@@ -110,172 +115,91 @@
     </div>
 </div>
 
-
 <script>
-    var editModal = document.getElementById('editPostModal');
-    editModal.addEventListener('show.bs.modal', function (event) {
-        var button = event.relatedTarget; // Button that triggered the modal
-        var id = button.getAttribute('data-id');
-        var title = button.getAttribute('data-title');
-        var link = button.getAttribute('data-link');
-        var categoryId = button.getAttribute('data-category');
-        var imageUrl = button.getAttribute('data-image'); // Make sure to pass image URL
-
-        var modalForm = document.getElementById('editPostForm');
-        modalForm.action = '/posts/' + id; // Update form action with the post ID
-
-        modalForm.querySelector('#edit-title').value = title; // Set the title field value
-        modalForm.querySelector('#edit-link').value = link; // Set the link field value
-        modalForm.querySelector('#edit-category').value = categoryId; // Set the category field value
-
-        // Update image preview
-        var imagePreview = modalForm.querySelector('#edit-image-preview');
-        if (imageUrl) {
-            imagePreview.src = `/storage/${imageUrl}`;
-            imagePreview.style.display = 'block';
-        } else {
-            imagePreview.style.display = 'none';
-        }
-
-        // Populate category dropdown
-        var categorySelect = modalForm.querySelector('#edit-category');
-        var categories = @json($categories); // Pass categories from the Blade view
-        categorySelect.innerHTML = '';
-        categories.forEach(category => {
-            var option = document.createElement('option');
-            option.value = category.id;
-            option.textContent = category.name;
-            if (category.id == categoryId) {
-                option.selected = true;
-            }
-            categorySelect.appendChild(option);
-        });
-    });
-    
-    // document.getElementById('editPostForm').addEventListener('submit', function(event) {
-    //     event.preventDefault(); // Prevent default form submission
-
-    //     var formData = new FormData(this); // Create a FormData object from the form
-
-    //     fetch(this.action, {
-    //         method: 'POST',
-    //         body: formData,
-    //         headers: {
-    //             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-    //             'Accept': 'application/json'
-    //         }
-    //     })
-    //     .then(response => {
-    //         if (!response.ok) {
-    //             return response.text().then(text => { throw new Error(text) });
-    //         }
-    //         return response.json();
-    //     })
-    //     .then(data => {
-    //         if (data.success) {
-    //             location.reload(); // Reload the page to reflect the changes
-    //         } else {
-    //             alert('An error occurred while updating the post.');
-    //         }
-    //     })
-    //     .catch(error => {
-    //         alert('An error occurred: ' + error.message);
-    //     });
-    // });
-
-    document.getElementById('editPostForm').addEventListener('submit', function(event) {
-        event.preventDefault(); // Prevent default form submission
-
-        var formData = new FormData(this); // Create a FormData object from the form
-
-        fetch(this.action, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                'Accept': 'application/json'
-            }
-        })
-        .then(response => {
-            if (!response.ok) {
-                return response.text().then(text => { throw new Error(text) });
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                // Show the success message
-                var successMessage = document.getElementById('successMessage');
-                successMessage.classList.remove('d-none');
-                
-                // Optionally hide the success message after a few seconds
-                setTimeout(() => {
-                    successMessage.classList.add('d-none');
-                }, 5000); // Hide after 5 seconds
-
-                // Optionally reload the page after a delay
-                setTimeout(() => {
-                    location.reload();
-                }, 7000); 
-            } else {
-                alert('An error occurred while updating the post.');
-            }
-        })
-        .catch(error => {
-            alert('An error occurred: ' + error.message);
-        });
-    });
-
-
-
-    document.getElementById('select-all').addEventListener('click', function() {
-        var checkboxes = document.querySelectorAll('input[name="posts[]"]');
-        checkboxes.forEach(checkbox => checkbox.checked = this.checked);
-    });
-
-    document.querySelectorAll('.delete-btn').forEach(button => {
-        button.addEventListener('click', function() {
-            const postId = this.getAttribute('data-id');
-            if (confirm('Are you sure you want to delete this post?')) {
-                fetch(`/posts/${postId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        location.reload(); // Reload the page to reflect the changes
-                    } else {
-                        alert('An error occurred while deleting the post.');
-                    }
-                })
-                .catch(error => {
-                    alert('An error occurred: ' + error.message);
-                });
-            }
-        });
-    });
-
-    var editModal = document.getElementById('editPostModal');
-    editModal.addEventListener('show.bs.modal', function (event) {
-        var button = event.relatedTarget;
-        var id = button.getAttribute('data-id');
-        var title = button.getAttribute('data-title');
-        var link = button.getAttribute('data-link');
-        var categoryId = button.getAttribute('data-category');
-
-        var modalForm = document.getElementById('editPostForm');
-        modalForm.action = '/posts/' + id; // Update form action
-        modalForm.querySelector('#edit-title').value = title; // Set the title field value
-        modalForm.querySelector('#edit-link').value = link; // Set the link field value
-        modalForm.querySelector('#edit-category').value = categoryId; // Set the category field value
-    });
-
     $(document).ready(function() {
-        $('#postsTable').DataTable();
+        var table = $('#postsTable').DataTable({
+            responsive: true,
+            // Add other DataTable options if needed
+        });
+
+        // Apply the search for each column
+        $('#postsTable thead tr:eq(1) th').each(function(i) {
+            $('input', this).on('keyup change', function() {
+                if (table.column(i).search() !== this.value) {
+                    table.column(i).search(this.value).draw();
+                }
+            });
+        });
+
+        // Handle modal data population
+        var editModal = document.getElementById('editPostModal');
+        editModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            var id = button.getAttribute('data-id');
+            var title = button.getAttribute('data-title');
+            var link = button.getAttribute('data-link');
+            var categoryId = button.getAttribute('data-category');
+            var imageUrl = button.getAttribute('data-image');
+
+            var modalForm = document.getElementById('editPostForm');
+            modalForm.action = '/posts/' + id;
+
+            modalForm.querySelector('#edit-title').value = title;
+            modalForm.querySelector('#edit-link').value = link;
+            modalForm.querySelector('#edit-category').value = categoryId;
+
+            var imagePreview = modalForm.querySelector('#edit-image-preview');
+            if (imageUrl) {
+                imagePreview.src = `/storage/${imageUrl}`;
+                imagePreview.style.display = 'block';
+            } else {
+                imagePreview.style.display = 'none';
+            }
+
+            var categorySelect = modalForm.querySelector('#edit-category');
+            var categories = @json($categories);
+            categorySelect.innerHTML = '';
+            categories.forEach(category => {
+                var option = document.createElement('option');
+                option.value = category.id;
+                option.textContent = category.name;
+                if (category.id == categoryId) {
+                    option.selected = true;
+                }
+                categorySelect.appendChild(option);
+            });
+        });
+
+        document.querySelectorAll('.delete-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const postId = this.getAttribute('data-id');
+                if (confirm('Are you sure you want to delete this post?')) {
+                    fetch(`/posts/${postId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            location.reload();
+                        } else {
+                            alert('An error occurred while deleting the post.');
+                        }
+                    })
+                    .catch(error => {
+                        alert('An error occurred: ' + error.message);
+                    });
+                }
+            });
+        });
+
+        document.getElementById('select-all').addEventListener('click', function() {
+            var checkboxes = document.querySelectorAll('input[name="posts[]"]');
+            checkboxes.forEach(checkbox => checkbox.checked = this.checked);
+        });
     });
 </script>
 @endsection

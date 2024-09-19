@@ -45,6 +45,6 @@ class User extends Authenticatable
 
     public function isAdmin()
     {
-        return $this->role === 'admin'; // Adjust based on how you determine admin status
+        return $this->role_id === 1; // 1 for admin
     }
 }

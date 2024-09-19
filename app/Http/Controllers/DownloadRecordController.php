@@ -52,7 +52,7 @@ class DownloadRecordController extends Controller
         }
         
         // Check the download limit
-        $downloadLimit = $subscription->subscription_type === 'free' ? 2 : PHP_INT_MAX;
+        $downloadLimit = $subscription->subscription_type === 'free' ? 150 : PHP_INT_MAX;
         $downloadCount = DownloadRecord::where('user_id', $userId)->count();
         
         $exceededLimit = $downloadCount >= $downloadLimit;

@@ -1,0 +1,254 @@
+.containerb {
+    max-width: 1200px;
+    margin: auto;
+    padding: 20px;
+}
+
+.containerb h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 24px;
+    color: #333;
+}
+
+.containerb .form-group {
+    margin-bottom: 20px;
+}
+
+.containerb .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+.containerb .form-group input, 
+.containerb .form-group select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.containerb .form-group input[type="number"] {
+    -moz-appearance: textfield; /* Remove spin buttons in Firefox */
+}
+
+.containerb .form-group input[type="color"] {
+    padding: 0;
+    border: none;
+    width: 40px;
+}
+
+.containerb .form-group .icon-preview, 
+.containerb .form-group .logo-preview {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.containerb .form-group .hidden {
+    display: none;
+}
+
+.containerb #header, .containerb #footer {
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    background-color: #007bff;
+    color: #ffffff;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.containerb #header .title, .containerb #footer .title {
+    flex-grow: 1;
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.containerb #header .logo, .containerb #footer .logo {
+    width: 50px;
+    height: 50px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.containerb #header .icon, .containerb #footer .icon {
+    font-size: 24px;
+}
+
+.containerb .button-containerb {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.containerb .button-containerb button {
+    padding: 10px 20px;
+    font-size: 16px;
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.containerb .button-containerb button:hover {
+    background-color: #0056b3;
+}
+
+@media (max-width: 768px) {
+    .containerb #header, .containerb #footer {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .containerb #header .title, .containerb #footer .title {
+        font-size: 16px;
+    }
+}
+
+/* custom-styles.css */
+
+.custom-home-page {
+    /* General styles for the home page */
+    background-color: rgba(255, 255, 255, 0.8);
+}
+
+.custom-home-page .category-name {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #343a40;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    padding: 10px;
+    border-radius: 0.375rem;
+    width: 200px;
+}
+
+.custom-home-page .category-name:hover {
+    background-color: #e9ecef;
+    color: #007bff;
+}
+
+.custom-home-page .category-name.selected {
+    background-color: #957474ad;
+    color: #fff;
+}
+
+.custom-home-page .img-gallery {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.custom-home-page .img-gallery img {
+    flex: 1 1 calc(33.333% - 10px);
+    max-width: 100%;
+    height: auto;
+}
+
+.custom-home-page .post-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.custom-home-page .post-item {
+    flex: 1 1 calc(50% - 15px);
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    padding: 10px;
+    background-color: #f8f9fa;
+    display: flex;
+    flex-direction: column;
+}
+
+.custom-home-page .post-item img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 0.375rem;
+    margin-bottom: 10px;
+}
+
+.custom-home-page .post-explanation {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-clamp: 3;
+    margin-bottom: 10px;
+}
+
+.custom-home-page .view-more, .custom-home-page .view-less, .custom-home-page .download-btn {
+    cursor: pointer;
+    color: #007bff;
+    text-decoration: underline;
+}
+
+.custom-home-page .ticket-section {
+    background-color: #f8f9fa;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.custom-home-page .ticket-container {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.custom-home-page .ticket {
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    padding: 20px;
+    width: calc(33.333% - 20px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.custom-home-page .ticket:hover {
+    background-color: #e9ecef;
+    transform: scale(1.03);
+}
+
+.custom-home-page .ticket-title {
+    font-size: 1.25rem;
+    margin-bottom: 10px;
+}
+
+.custom-home-page .ticket-price {
+    font-size: 1.5rem;
+    color: #007bff;
+    margin-bottom: 15px;
+}
+
+.custom-home-page .ticket-description {
+    font-size: 1rem;
+    color: #6c757d;
+}
+
+.custom-home-page .badge {
+    font-size: 0.875rem;
+    padding: 0.375em 0.75em;
+    border-radius: 0.25rem;
+    background-color: #28a745;
+    color: #fff;
+}
+
+.custom-home-page .mb-2 { 
+    margin-bottom: 0.5rem;
+}
+

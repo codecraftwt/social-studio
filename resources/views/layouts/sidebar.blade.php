@@ -4,40 +4,41 @@
         <li class="nav-item">
             <a class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}" href="{{ route('home') }}">Dashboard</a>
         </li>
-        <!-- Categories Section -->
+        
+        @if(auth()->check() && auth()->user()->isAdmin())
+            <li class="nav-item">
+                <a class="nav-link d-flex justify-content-between align-items-center" href="#" data-bs-toggle="collapse" data-bs-target="#categoriesSubmenu" aria-expanded="{{ request()->routeIs('categories.*') ? 'true' : 'false' }}" aria-controls="categoriesSubmenu">
+                    Categories
+                    <i class="bi bi-caret-down-fill ms-2"></i>
+                </a>
+                <ul id="categoriesSubmenu" class="nav flex-column collapse {{ request()->routeIs('categories.*') ? 'show' : '' }}">
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('categories.create') ? 'active' : '' }}" href="{{ route('categories.create') }}">Add Categories</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('categories.index') ? 'active' : '' }}" href="{{ route('categories.index') }}">View Categories</a>
+                    </li>
+                </ul>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link d-flex justify-content-between align-items-center" href="#" data-bs-toggle="collapse" data-bs-target="#postsSubmenu" aria-expanded="{{ request()->routeIs('posts.*') ? 'true' : 'false' }}" aria-controls="postsSubmenu">
+                    Posts
+                    <i class="bi bi-caret-down-fill ms-2"></i>
+                </a>
+                <ul id="postsSubmenu" class="nav flex-column collapse {{ request()->routeIs('posts.*') ? 'show' : '' }}">
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('posts.create') ? 'active' : '' }}" href="{{ route('posts.create') }}">Add Post</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('posts.index') ? 'active' : '' }}" href="{{ route('posts.index') }}">View Posts</a>
+                    </li>
+                </ul>
+            </li>
+        @endif
+        
         <li class="nav-item">
-            <a class="nav-link d-flex justify-content-between align-items-center" href="#" data-bs-toggle="collapse" data-bs-target="#categoriesSubmenu" aria-expanded="{{ request()->routeIs('categories.*') ? 'true' : 'false' }}" aria-controls="categoriesSubmenu">
-                Categories
-                <i class="bi bi-caret-down-fill ms-2"></i>
-            </a>
-            <ul id="categoriesSubmenu" class="nav flex-column collapse {{ request()->routeIs('categories.*') ? 'show' : '' }}">
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('categories.create') ? 'active' : '' }}" href="{{ route('categories.create') }}">Add Categories</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('categories.index') ? 'active' : '' }}" href="{{ route('categories.index') }}">View Categories</a>
-                </li>
-            </ul>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link d-flex justify-content-between align-items-center" href="#" data-bs-toggle="collapse" data-bs-target="#postsSubmenu" aria-expanded="{{ request()->routeIs('posts.*') ? 'true' : 'false' }}" aria-controls="postsSubmenu">
-                Posts
-                <i class="bi bi-caret-down-fill ms-2"></i>
-            </a>
-            <ul id="postsSubmenu" class="nav flex-column collapse {{ request()->routeIs('posts.*') ? 'show' : '' }}">
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('posts.create') ? 'active' : '' }}" href="{{ route('posts.create') }}">Add Post</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('posts.index') ? 'active' : '' }}" href="{{ route('posts.index') }}">View Posts</a>
-                </li>
-            </ul>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="{{ route('header.create')}}">Create Header</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="#">Create Footer</a>
+            <a class="nav-link" href="{{ route('header.create')}}">Create Header/Footer</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="#">Profile</a>
