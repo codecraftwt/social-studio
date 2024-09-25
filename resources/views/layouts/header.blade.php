@@ -1,7 +1,7 @@
-<nav class="navbar navbar-expand-md navbar-light bg-primary text-white shadow-sm">
+<nav class="navbar navbar-expand-md home-page-header text-white shadow-sm">
     <div class="container">
         <a class="navbar-brand text-white" href="{{ url('/home') }}">
-            Dashboard
+            <img src="{{ asset('storage/images/walstar_logo.png') }}" alt="Logo" class="img-fluid" style="height: 50px;">
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
             data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
@@ -29,27 +29,32 @@
                             </a>
                         </li>
                     @endif
-                @else
-                    <li class="nav-item dropdown">
-                        <a id="navbarDropdown" class="nav-link dropdown-toggle text-white" href="#"
-                            role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
-                            v-pre>
-                            {{ Auth::user()->name }}
-                        </a>
-
-                        <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                            <a class="dropdown-item" href="{{ route('logout') }}"
-                                onclick="event.preventDefault();
-                                             document.getElementById('logout-form').submit();">
-                                <i class="bi bi-box-arrow-right"></i> {{ __('Logout') }}
+                    @else
+                        <li class="nav-item dropdown">
+                            <a id="navbarDropdown" class="nav-link dropdown-toggle text-white" href="#" role="button" 
+                                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
+                                <i class="bi bi-person-circle" style="font-size: 30px; color: white;"></i>
                             </a>
 
-                            <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
-                                @csrf
-                            </form>
-                        </div>
-                    </li>
-                @endguest
+                            <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                <span class="dropdown-item">Welcome: {{ Auth::user()->name }}</span>
+                                <a class="dropdown-item" href="#">
+                                    <i class="bi bi-person"></i> User Profile
+                                </a>
+                                <a class="dropdown-item" href="#">
+                                    <i class="bi bi-gear"></i> Settings
+                                </a>
+                                <a class="dropdown-item" href="{{ route('logout') }}"
+                                    onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                    <i class="bi bi-box-arrow-right"></i> Logout
+                                </a>
+
+                                <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                                    @csrf
+                                </form>
+                            </div>
+                        </li>
+                    @endguest
             </ul>
         </div>
     </div>

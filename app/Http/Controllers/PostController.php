@@ -14,6 +14,9 @@ class PostController extends Controller
     public function index()
     {
         $posts = Post::with('category')->get();
+        if ($posts->isEmpty()) {
+            $posts = collect(); // Set to an empty collection
+        }
         $categories = Category::all(); // Fetch all categories
         return view('posts.index', compact('posts', 'categories')); // Pass categories to the view
     }
@@ -76,13 +79,13 @@ class PostController extends Controller
 
     public function update(Request $request, Post $post)
     {
-        $request->validate([
-            'post_title' => 'required|max:255',
-            'post_explanation' => 'required',
-            'link' => 'nullable|url',
-            'category_id' => 'required|exists:categories,id',
-            'post_image' => 'nullable|image|mimes:jpg,png,jpeg,gif|max:2048',
-        ]);
+        // $request->validate([
+        //     'post_title' => 'required|max:255',
+        //     'post_explanation' => 'required',
+        //     'link' => 'nullable|url',
+        //     'category_id' => 'required|exists:categories,id',
+        //     'post_image' => 'nullable|image|mimes:jpg,png,jpeg,gif|max:2048',
+        // ]);
     
         $postData = $request->except('post_image');
     
@@ -102,8 +105,12 @@ class PostController extends Controller
 
     public function destroy(Post $post)
     {
-        $post->delete();
-        return redirect()->route('posts.index')->with('success', 'Post deleted successfully.');
+        try {
+            $post->delete();
+            return response()->json(['success' => true, 'message' => 'Post deleted successfully.']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Error deleting post.'], 500);
+        }
     }
 
     public function bulkDelete(Request $request)

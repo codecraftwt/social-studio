@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Category;
 use App\Models\Post;
+use App\Models\User;
 use App\Models\HeaderFooter;
 
 class HomeController extends Controller
@@ -30,7 +31,12 @@ class HomeController extends Controller
         $categories = Category::all();
 
         if (auth()->check()) {
-            return view('home', compact('categories'));
+            // return view('home', compact('categories'));
+            $totalUsers = User::count();
+            $totalCategories = Category::count();
+            $totalPosts = Post::count();
+        
+            return view('home', compact('totalUsers', 'totalCategories', 'categories', 'totalPosts'));
         }else{
             return redirect()->route('login')->with('error', 'You need to log in to access the dashboard.');
         }

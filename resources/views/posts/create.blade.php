@@ -62,7 +62,7 @@ function previewAndResizeImage(event) {
 
     const img = new Image();
     img.onload = function() {
-        const width = 800; // Desired width
+        const width = 750; // Desired width
         const height = 600; // Desired height
 
         canvas.width = width;

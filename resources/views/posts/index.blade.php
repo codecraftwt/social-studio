@@ -59,7 +59,7 @@
                             @endif
                         </td>
                         <td>
-                            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editPostModal" data-id="{{ $post->id }}" data-title="{{ $post->post_title }}" data-link="{{ $post->link }}" data-category="{{ $post->category_id }}" data-image="{{ $post->post_image }}">Edit</button>
+                            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editPostModal" data-id="{{ $post->id }}" data-post_explanation="{{$post->post_explanation }}" data-title="{{ $post->post_title }}" data-link="{{ $post->link }}" data-category="{{ $post->category_id }}" data-image="{{ $post->post_image }}">Edit</button>
                             <button type="button" class="btn btn-danger btn-sm delete-btn" data-id="{{ $post->id }}">Delete</button>
                         </td>
                     </tr>
@@ -78,7 +78,7 @@
                 <h5 class="modal-title" id="editPostModalLabel">Edit Post</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form id="editPostForm" action="{{ route('posts.update', $post->id) }}" method="POST" enctype="multipart/form-data">
+            <form id="editPostForm" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
                 <div class="modal-body">
@@ -122,7 +122,6 @@
             // Add other DataTable options if needed
         });
 
-        // Apply the search for each column
         $('#postsTable thead tr:eq(1) th').each(function(i) {
             $('input', this).on('keyup change', function() {
                 if (table.column(i).search() !== this.value) {
@@ -137,6 +136,7 @@
             var button = event.relatedTarget;
             var id = button.getAttribute('data-id');
             var title = button.getAttribute('data-title');
+            var post_explanation = button.getAttribute('data-post_explanation');
             var link = button.getAttribute('data-link');
             var categoryId = button.getAttribute('data-category');
             var imageUrl = button.getAttribute('data-image');
@@ -145,6 +145,7 @@
             modalForm.action = '/posts/' + id;
 
             modalForm.querySelector('#edit-title').value = title;
+            modalForm.querySelector('#edit-explanation').value = post_explanation;
             modalForm.querySelector('#edit-link').value = link;
             modalForm.querySelector('#edit-category').value = categoryId;
 
@@ -181,21 +182,32 @@
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                         }
                     })
-                    .then(response => response.json())
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
                     .then(data => {
                         if (data.success) {
-                            location.reload();
+                            const successMessage = document.getElementById('successMessage');
+                            successMessage.textContent = 'Post deleted successfully!';
+                            successMessage.classList.remove('d-none');
+                            successMessage.classList.add('show');
+                            setTimeout(() => {
+                                location.reload();
+                            }, 2000);
                         } else {
-                            alert('An error occurred while deleting the post.');
+                            alert(data.message || 'An error occurred while deleting the post.');
                         }
                     })
                     .catch(error => {
+                        console.error('Error:', error);
                         alert('An error occurred: ' + error.message);
                     });
                 }
             });
         });
-
         document.getElementById('select-all').addEventListener('click', function() {
             var checkboxes = document.querySelectorAll('input[name="posts[]"]');
             checkboxes.forEach(checkbox => checkbox.checked = this.checked);

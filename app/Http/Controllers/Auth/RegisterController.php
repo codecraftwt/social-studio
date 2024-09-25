@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Subscription;
 use Stripe\Stripe;
+use App\Notifications\WelcomeEmailNotification;
 use Stripe\Checkout\Session as StripeSession;
 
 class RegisterController extends Controller
@@ -56,6 +57,12 @@ class RegisterController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'address' => ['required', 'string', 'max:255'],
+            'postal_code' => ['required', 'string', 'max:10'],
+            'current_location' => ['required', 'string', 'max:255'],
+            'mobile' => ['required', 'string', 'max:15'],
+            'plan' => ['required', 'in:free,standard,premium'],
+            'profile_pic' => ['required', 'image', 'max:2048'],
         ]);
     }
 
@@ -70,16 +77,19 @@ class RegisterController extends Controller
         $plan = request()->input('plan', 'free');
         // Retrieve the Subscriber role
         $subscriberRole = Role::where('name', 'Subscriber')->first();
-    
-        // Create the user
+        $profilePicPath = $data['profile_pic']->store('profile_pics', 'public');
         $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
             'role_id' => $subscriberRole ? $subscriberRole->id : null,
+            'address' => $data['address'],
+            'postal_code' => $data['postal_code'],
+            'current_location' => $data['current_location'],
+            'mobile' => $data['mobile'],
+            'profile_pic' => $profilePicPath,
         ]);
-    
-        // Determine the expiry date based on the plan
+        $user->notify(new WelcomeEmailNotification());
         $expiryDate = null;
         if ($plan === 'standard') {
             // $expiryDate = now()->addMonth();

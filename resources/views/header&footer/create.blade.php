@@ -127,7 +127,7 @@
 
             <div class="form-group">
                 <label for="font-size">Font Size:</label>
-                <input type="number" id="font-size" value="18" min="03" max="72">
+                <input type="number" id="font-size" value="" min="03" max="72">
             </div>
 
             <div class="form-group">
@@ -239,9 +239,8 @@
         }
     });
 
-    const FIXED_HEADER_WIDTH = 640; // Fixed width for header
-    const FIXED_FOOTER_WIDTH = 640; 
-    // Generate header
+    const FIXED_HEADER_WIDTH = 600; // Fixed width for header
+    const FIXED_FOOTER_WIDTH = 600; 
     document.getElementById('generate-header').addEventListener('click', function() {
         var headerText = document.getElementById('header-text').value;
         var backgroundColor = document.getElementById('background-color').value;
@@ -314,26 +313,26 @@
         var backgroundColor = document.getElementById('footer-background-color').value;
         var textColor = document.getElementById('footer-text-color').value;
         var icon = document.getElementById('footer-icon').value;
+        var fontSize = document.getElementById('font-size').value;
         var logoPosition = document.getElementById('footer-logo-position').value;
         var fixedFooterWidth = FIXED_FOOTER_WIDTH;
         var footerHeight = 150;
 
+        // Set footer text and styles
         document.getElementById('footer-title').textContent = footerText;
         document.getElementById('footer').style.backgroundColor = backgroundColor;
         document.getElementById('footer').style.color = textColor;
-        document.getElementById('footer-icon').textContent = icon;
-
+        document.getElementById('footer-icon').textContent = icon; // Ensure this is a valid element
+        document.getElementById('footer-title').style.fontSize = fontSize + 'px';
+        // Set dimensions
         document.getElementById('footer').style.width = fixedFooterWidth + 'px';
         document.getElementById('footer').style.height = footerHeight + 'px';
 
-        if (logoPosition === 'left') {
-            document.getElementById('footer-logo').style.float = 'left';
-        } else if (logoPosition === 'right') {
-            document.getElementById('footer-logo').style.float = 'right';
-        } else {
-            document.getElementById('footer-logo').style.float = 'none';
-        }
+        // Handle logo positioning
+        var footerLogo = document.getElementById('footer-logo');
+        footerLogo.style.float = logoPosition === 'left' ? 'left' : (logoPosition === 'right' ? 'right' : 'none');
 
+        // Use html2canvas to generate the footer image
         html2canvas(document.getElementById('footer')).then(function(canvas) {
             var imageData = canvas.toDataURL('image/png');
 
@@ -362,7 +361,6 @@
                 .catch(error => {
                     console.error('Error saving footer:', error);
                 });
-
             };
         }).catch(function(error) {
             console.error('Error generating canvas:', error);

@@ -15,6 +15,7 @@
     <link href="https://fonts.bunny.net/css?family=Nunito" rel="stylesheet">
 
     <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 </head>
@@ -22,10 +23,53 @@
 <body>
     <!-- Header -->
     @include('layouts.header')
+<style>
+    .image-crop {
+        width: 100%; /* Adjust as needed */
+        height: 490px; /* Set the desired height */
+        overflow: hidden; /* Hide overflow */
+        position: relative; /* Position for absolute children */
+    }
 
+    .image-crop img {
+        position: absolute;
+        top: -50%; /* Adjust this value to center the image */
+        left: 50%;
+        transform: translate(-50%, 0); /* Center the image */
+        min-width: 100%; /* Ensure the image covers the width */
+    }
+
+    .overlay {
+        position: absolute; /* Position the overlay */
+        top: 0; /* Cover the entire area */
+        left: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        background-color: rgba(0, 0, 0, 0.5); 
+        z-index: 1; 
+    }
+
+    .center-button {
+        position: absolute; /* Position absolutely within the container */
+        top: 50%; /* Center vertically */
+        left: 50%; /* Center horizontally */
+        transform: translate(-50%, -50%); /* Adjust for the button's size */
+        z-index: 2; /* Ensure the button is above the overlay */
+        background-color: #004c72; /* Button background color */
+    }
+    .btn-large {
+        padding: 15px 45px; /* Increase padding for larger button */
+        font-size: 18px;    /* Increase font size */
+    }
+</style>
     <div class="custom-home-page">
+        <div class="image-section image-crop text-center mb-4">
+            <img src="{{ asset('storage/images/social_media.jpg') }}" alt="Promotional Image" class="img-fluid">
+            <div class="overlay"></div> <!-- Overlay div -->
+            <a href="{{ route('register') }}" class="btn btn-primary center-button btn-large">Register Now</a>
+        </div>
         <!-- Ticket Section -->
-        <div class="ticket-section">
+        <div class="ticket-section d-none">
             <div class="container">
                 <div class="ticket-container">
                     <div class="ticket">
@@ -56,14 +100,18 @@
                 <div class="row">
                     <!-- Categories Sidebar -->
                     <div class="col-md-3 mb-3">
-                        <div class="card shadow-sm border-light rounded h-100">
+                    <div class="card shadow-sm border-light rounded">
                             <div class="card-body">
-                                <h5 class="card-title mb-4">Select Categories</h5>
+                                <h5 class="card-title mb-4 text-center">Select Categories</h5>
+                                <hr style="border-top: 2px solid #004c72; margin-bottom: 20px;"> <!-- Line below the title -->
                                 <ul class="list-unstyled">
                                     @foreach ($categories as $category)
                                         <li class="mb-3">
                                             <div class="d-flex justify-content-between align-items-center">
-                                                <span class="category-name" data-id="{{ $category->id }}">{{ $category->name }}</span>
+                                                <span class="category-name" data-id="{{ $category->id }}" 
+                                                    style="{{ $category->isActive ? 'color: #004c72;' : 'color: inherit;' }}">
+                                                    {{ $category->name }}
+                                                </span>
                                                 @if ($category->isNew)
                                                     <span class="badge bg-success text-white">New</span>
                                                 @endif
@@ -77,9 +125,8 @@
                         </div>
                     </div>
 
-                    <!-- Posts Section -->
-                    <div class="col-md-9 mb-3 overflow-scroll">
-                        <div class="card h-100">
+                    <div class="col-md-9 mb-3">
+                        <div class="card">
                             <div class="card-body">
                                 <h5 class="card-title">View Posts</h5>
                                 <div id="posts-content" class="post-container">
@@ -88,28 +135,22 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Image Gallery -->
-                <div class="img-gallery mb-4">
-                    <img src="{{ asset('storage/images/images2.jpg') }}" alt="Image 1">
-                    <img src="{{ asset('storage/images/images3.jpg') }}" alt="Image 2">
-                </div>
             </div>
         </div>
 
-        <div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-labelledby="imagePreviewLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
+        <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-sm"> <!-- or modal-md for medium size -->
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="imagePreviewLabel">Preview Image</h5>
+                        <h5 class="modal-title" id="imageModalLabel">Downloading Image</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div class="modal-body text-center">
-                        <img id="previewImage" src="" alt="Image Preview" class="img-fluid">
+                    <div class="modal-body">
+                        <img id="downloadedImage" src="" alt="Generated Image" class="img-fluid">
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="button" class="btn btn-primary" id="confirmDownload">Confirm Download</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" id="downloadButton" class="btn btn-primary">Download</button>
                     </div>
                 </div>
             </div>
@@ -153,9 +194,7 @@
                             content += '<div class="post-content">';
                             content += '<img src="' + '{{ asset('storage') }}/' + post.post_image + '" alt="' + post.post_title + '">';
                             content += '<div class="post-explanation">' + truncatedExplanation + '...</div>';
-                            // content += '<div class="full-explanation">' + fullExplanation + '</div>';
-                            // content += '<p class="view-more">View More</p>';
-                            content += '<a class="download-btn" href="#" data-image="' + '{{ asset('storage') }}/' + post.post_image + '" data-header="' + headerPath + '" data-footer="' + footerPath + '" data-post-id="' + post.id + '">Download Post</a>';
+                            content += '<button type="button" class="btn btn-primary"><a class="download-btn" href="#" data-image="' + '{{ asset('storage') }}/' + post.post_image + '" data-header="' + headerPath + '" data-footer="' + footerPath + '" data-post-id="' + post.id + '">Download Post</a></button>';
                             content += '</div>';
                             content += '</div>';
                         });
@@ -262,11 +301,31 @@
                         if (footerLoaded) {
                             ctx.drawImage(footer, (canvas.width - footer.width) / 2, canvas.height - footer.height); // Center footer
                         }
+                        // var imageDataUrl = canvas.toDataURL('image/png');
+                        // var link = document.createElement('a');
+                        // link.href = canvas.toDataURL('image/png');
+                        // link.download = 'post-image.png';
+                        // link.click();
 
-                        var link = document.createElement('a');
-                        link.href = canvas.toDataURL('image/png');
-                        link.download = 'post-image.png';
-                        link.click();
+                        var imageDataUrl = canvas.toDataURL('image/png');
+                        document.getElementById('downloadedImage').src = imageDataUrl;
+
+                        document.getElementById('downloadedImage').src = imageDataUrl;
+
+                        // Set up download button
+                        document.getElementById('downloadButton').onclick = function() {
+                            var link = document.createElement('a');
+                            link.href = imageDataUrl;
+                            link.download = 'post-image.png';
+                            link.click();
+                        };
+
+                        // document.getElementById('downloadedImage').src = imageDataUrl;
+                        // var imageModal = new bootstrap.Modal(document.getElementById('imageModal'));
+                        // imageModal.show();
+
+                        var imageModal = new bootstrap.Modal(document.getElementById('imageModal'));
+                        imageModal.show();
 
                         $.ajax({
                             url: '{{ route('download.record') }}',

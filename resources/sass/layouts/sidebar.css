@@ -16,8 +16,8 @@
 
 /* Styling for active link */
 .nav-link.active {
-    background-color: #e9ecef;
-    color: #0d6efd;
+    background-color:  #415094;
+    color: white !important;
     font-weight: bold;
 }
 
@@ -37,7 +37,7 @@
 
 /* Hover effect for sub-menu items */
 #categoriesSubmenu .nav-link:hover, #postsSubmenu .nav-link:hover {
-    background-color: #e9ecef;
+    /* background-color: #e9ecef; */
 }
 
 /* Down arrow rotation */
