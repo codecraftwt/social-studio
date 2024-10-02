@@ -6,49 +6,147 @@
 
     <form action="{{ route('posts.store') }}" method="POST" enctype="multipart/form-data" id="postForm">
         @csrf
-        <div class="mb-3">
-            <label for="link" class="form-label">Link</label>
-            <input type="text" class="form-control @error('link') is-invalid @enderror" id="link" name="link" value="{{ old('link') }}">
-            @error('link')
-                <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <div class="input-box">
+                    <input type="text" name="link" id="link" required class=" @error('link') is-invalid @enderror">
+                    <label>Link</label>
+                    @error('link')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="input-box">
+                    <input type="text" class=" @error('post_title') is-invalid @enderror" name="post_title" id="post_title" value="{{ old('post_title') }}" required>
+                    <label>Post Title</label>
+                    @error('post_title')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+            </div>
         </div>
-        <div class="mb-3">
-            <label for="post_image" class="form-label">Post Image</label>
-            <input type="file" class="form-control @error('post_image') is-invalid @enderror" id="post_image" name="post_image" accept="image/*" onchange="previewAndResizeImage(event)">
-            @error('post_image')
-                <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
+        
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <div class="input-box">
+                    <select class=" @error('category_id') is-invalid @enderror" id="category_id" name="category_id" required>
+                        <option value="">Select a category</option>
+                        @foreach ($categories as $category)
+                            <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                                {{ $category->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('category_id')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="input-box">
+                    <select class=" @error('subcategory_id') is-invalid @enderror" id="subcategory_id" name="sub_category_id" required>
+                        <option value="">Select a subcategory</option>
+                        <!-- Subcategories will be populated here via JavaScript -->
+                    </select>
+                    @error('subcategory_id')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+            </div>
         </div>
-        <div class="mb-3">
-            <label for="post_title" class="form-label">Post Title</label>
-            <input type="text" class="form-control @error('post_title') is-invalid @enderror" id="post_title" name="post_title" value="{{ old('post_title') }}" required>
-            @error('post_title')
-                <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <div class="input-box2">
+                    <label for="post_image" class="form-label">Post Image</label>
+                    <input type="file" class=" @error('post_image') is-invalid @enderror" id="post_image" name="post_image" accept="image/*" >
+                    @error('post_image')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="input-box2">
+                    <label for="post_pdf" class="form-label">Post PDF</label>
+                    <input type="file" class="@error('post_pdf') is-invalid @enderror" id="post_pdf" name="post_pdf" accept=".pdf" onchange="previewPdf(event)">
+                    @error('post_pdf')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+            </div>
         </div>
-        <div class="mb-3">
-            <label for="post_explanation" class="form-label">Post Explanation</label>
-            <textarea class="form-control @error('post_explanation') is-invalid @enderror" id="post_explanation" name="post_explanation" rows="5" required>{{ old('post_explanation') }}</textarea>
-            @error('post_explanation')
-                <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <div class="input-box">
+                    <select class=" @error('header_footer_access') is-invalid @enderror" id="header_footer_access" name="header_footer_access" required>
+                        <option value="">Select header and footer Access Type</option>
+                        <option value="1" {{ old('header_footer_access') == '1' ? 'selected' : '' }}>Header and Footer</option>
+                        <option value="2" {{ old('header_footer_access') == '2' ? 'selected' : '' }}>Only Header</option>
+                        <option value="3" {{ old('header_footer_access') == '3' ? 'selected' : '' }}>Only Footer</option>
+                    </select>
+                    @error('header_footer_access')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="input-box">
+                    <!-- Color picker input -->
+                    <label for="border_color" class="form-label">Select border Color</label>
+                    <input type="color" id="customColor" name="border_color" value="{{ old('border_color', '#ffffff') }}" class="" required />
+
+                    @error('border_color')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+            </div>
         </div>
+
         <div class="mb-3">
-            <label for="category_id" class="form-label">Category</label>
-            <select class="form-select @error('category_id') is-invalid @enderror" id="category_id" name="category_id" required>
-                <option value="">Select a category</option>
-                @foreach ($categories as $category)
-                    <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
-                        {{ $category->name }}
-                    </option>
-                @endforeach
-            </select>
-            @error('category_id')
-                <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
+            <div class="input-box">
+                <label for="post_explanation" class="form-label">Post Explanation</label>
+                <textarea class=" @error('post_explanation') is-invalid @enderror" id="post_explanation" name="post_explanation" rows="2" required>{{ old('post_explanation') }}</textarea>
+                @error('post_explanation')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
         </div>
-        <button type="submit" class="btn btn-primary">Add Post</button>
+
+        <div id="headerFields" style="display:none;">
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <div class="input-box">
+                        <input type="text" class=" @error('header_title') is-invalid @enderror" name="header_title" id="header_title" value="{{ old('header_title') }}">
+                        <label>Header Title</label>
+                        @error('header_title')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="input-box">
+                        <label for="header_color" class="form-label">Header Color</label>
+                        <input type="color" id="header_color" name="header_color" value="{{ old('header_color', '#ffffff') }}" />
+                        @error('header_color')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="input-box">
+                        <label for="text_color" class="form-label">Header Text Color</label>
+                        <input type="color" id="text_color" name="text_color" value="{{ old('text_color', '#ffffff') }}" />
+                        @error('text_color')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-large btn-log">Add Post</button>
     </form>
 
     <canvas id="canvas" style="display:none;"></canvas>
@@ -62,13 +160,27 @@ function previewAndResizeImage(event) {
 
     const img = new Image();
     img.onload = function() {
-        const width = 750; // Desired width
-        const height = 600; // Desired height
+        const canvasWidth = 750; // Desired width
+        const canvasHeight = 600; // Total desired height
+        const headerHeight = 80; // Header height
+        const footerHeight = 80; // Footer height
 
-        canvas.width = width;
-        canvas.height = height;
+        // Calculate the height for the image area
+        const imageHeight = canvasHeight - headerHeight - footerHeight;
 
-        ctx.drawImage(img, 0, 0, width, height);
+        canvas.width = canvasWidth;
+        canvas.height = canvasHeight;
+
+        // Draw header
+        ctx.fillStyle = 'white'; // Header color
+        ctx.fillRect(0, 0, canvasWidth, headerHeight);
+
+        // Draw the image
+        ctx.drawImage(img, 0, headerHeight, canvasWidth, imageHeight);
+
+        // Draw footer
+        ctx.fillStyle = 'white'; // Footer color
+        ctx.fillRect(0, canvasHeight - footerHeight, canvasWidth, footerHeight);
 
         // Convert canvas to Blob
         canvas.toBlob(function(blob) {
@@ -80,5 +192,40 @@ function previewAndResizeImage(event) {
     };
     img.src = URL.createObjectURL(file);
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    const subcategories = @json($subcategories);
+    const categorySelect = document.getElementById('category_id');
+    const subcategorySelect = document.getElementById('subcategory_id');
+
+    categorySelect.addEventListener('change', function() {
+        const selectedCategoryId = this.value;
+
+        // Clear the subcategory select
+        subcategorySelect.innerHTML = '<option value="">Select a subcategory</option>';
+
+        if (selectedCategoryId && subcategories[selectedCategoryId]) {
+            // Populate the subcategory select
+            subcategories[selectedCategoryId].forEach(subcategory => {
+                const option = document.createElement('option');
+                option.value = subcategory.id;
+                option.textContent = subcategory.sub_category_name; // Ensure this matches your structure
+                subcategorySelect.appendChild(option);
+            });
+        }
+    });
+
+    const headerFooterAccessSelect = document.getElementById('header_footer_access');
+    const headerFields = document.getElementById('headerFields');
+
+    headerFooterAccessSelect.addEventListener('change', function() {
+        const value = this.value;
+        if (value === '1' || value === '2') {
+            headerFields.style.display = 'block'; // Show header fields
+        } else {
+            headerFields.style.display = 'none'; // Hide header fields
+        }
+    });
+});
 </script>
 @endsection

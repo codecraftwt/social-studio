@@ -18,9 +18,9 @@
             </div>
         </div>
         
-        <div class="row mt-4">
+        <div class="row mt-4 mt-4">
             @if(auth()->check() && auth()->user()->isAdmin())
-            <div class="col-md-4">
+            <div class="col-md-4 mt-4">
                 <div class="card text-center">
                     <div class="card-body">
                         <h5 class="card-title">Users</h5>
@@ -29,7 +29,7 @@
                 </div>
             </div>
             @endif
-            <div class="col-md-4">
+            <div class="col-md-4 mt-4">
                 <div class="card text-center">
                     <div class="card-body">
                         <h5 class="card-title">Categories</h5>
@@ -37,7 +37,15 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-4 mt-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Sub-Categories</h5>
+                        <p class="card-text">Number of Sub-Categories: <h3 class="gradient-color2" id="totalPosts">{{ $SubCategory }}</h3></p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mt-4">
                 <div class="card text-center">
                     <div class="card-body">
                         <h5 class="card-title">Posts</h5>

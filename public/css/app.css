@@ -8,44 +8,34 @@ body {
     border-radius: 10px;
     overflow: hidden; /* Ensures rounded corners are visible */
 }
-#sidebar {
+
+.modal-content {
     border-right: 4px solid #dee2e6 !important;
     background-color: #dfecff !important; 
     color: #41579d !important;
+    transition: width 0.3s ease;
 }
-.nav-link {
-    padding: 10px 15px !important;
-    text-decoration: none !important;
-    transition: background-color 0.3s ease !important;
-    font-weight: 600 !important; 
+.siding {
+    width: 250px;
+    position: fixed;
+    top: 0;
+    left: -250px; /* Hidden initially */
+    height: 100%;
+    background: #f8f9fa;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    transition: left 0.3s ease;
 }
-#sidebar .nav-link {
-    transition: background-color 0.3s ease, color 0.3s ease;
+.siding.show {
+    left: 0; /* Show sidebar */
 }
-
-#sidebar .nav-link:hover {
-    background-color: #6e80ba; /* Background color on hover */
-    color: white; 
-}
-#sidebar.collapsed {
-    width: 60px; /* Adjust as needed */
-    overflow: hidden;
-}
-
-#sidebar.collapsed .nav-link {
-    white-space: nowrap; /* Prevent text wrapping */
-    text-align: center; /* Center text */
+.navbar-collapse {
+    z-index: 1000; /* Adjust as necessary */
 }
 
-#sidebar.collapsed .nav-link span {
-    display: none; /* Hide text when collapsed */
+/* Add padding to the main content area */
+.main-content {
+    padding-top: 20px; /* Space below the navbar */
 }
-
-#sidebar.collapsed .logo {
-    height: 70px !important; 
-    width: 140px !important;
-}
-
 .profile-info {
     font-weight: bold;
     font-size: 1.2rem;
@@ -192,8 +182,15 @@ body {
 }
 
 .custom-home-page .category-name.selected {
-    background-color: #0094de !important;
+    background-color: #004c72 !important;
     color: #fff;
+}
+
+.custom-home-page .category-name:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(135deg,#004c72, #6c74bf);
+    color: white; 
 }
 
 .custom-home-page .img-gallery {
@@ -308,10 +305,200 @@ body {
     border: none; /* Remove border for cleaner look */
 }
 
+.custom-home-page .image-crop {
+    width: 100%; /* Adjust as needed */
+    height: 490px; /* Set the desired height */
+    overflow: hidden; /* Hide overflow */
+    position: relative; /* Position for absolute children */
+}
+
+.custom-home-page .image-crop img {
+    position: absolute;
+    top: -50%; /* Adjust this value to center the image */
+    left: 50%;
+    transform: translate(-50%, 0); /* Center the image */
+    min-width: 100%; /* Ensure the image covers the width */
+}
+
+.custom-home-page .overlay {
+    position: absolute; /* Position the overlay */
+    top: 0; /* Cover the entire area */
+    left: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    background-color: rgba(0, 0, 0, 0.5); 
+    z-index: 1; 
+}
+
+.custom-home-page .center-button {
+    position: absolute; /* Position absolutely within the container */
+    top: 50%; /* Center vertically */
+    left: 50%; /* Center horizontally */
+    transform: translate(-50%, -50%); /* Adjust for the button's size */
+    z-index: 2; /* Ensure the button is above the overlay */
+    background-color: #004c72; /* Button background color */
+}
+.custom-home-page .btn-large {
+    padding: 15px 45px; /* Increase padding for larger button */
+    font-size: 18px;    /* Increase font size */
+}
+
+.custom-home-page .filter-option {
+cursor: pointer;
+padding: 10px;
+margin-right: 10px;
+border: 1px solid transparent;
+border-radius: 5px;
+transition: background-color 0.3s;
+}
+
+.custom-home-page .filter-option:hover {
+background-color: #e9ecef; /* Light hover effect */
+}
+
+.custom-home-page .filter-option.active {
+background-color: #004c72; /* Active option color */
+color: white; /* Change text color for active option */
+border: 1px solid #004c72; /* Active border */
+}
+
+.custom-home-page .post-item {
+padding: 20px;
+border: 1px solid #ddd;
+border-radius: 5px;
+margin-top: 10px;
+background-color: #f8f9fa; /* Light background for posts */
+}
+.custom-home-page .card-body span {
+font-weight: bold;
+color: #004c72; /* Or any other color */
+}
+
+.custom-home-page .card-body .text-center {
+font-size: 1.2rem; /* Adjust font size as needed */
+}
+
+.custom-home-page .custom-home-page {
+display: flex;
+flex-direction: column;
+min-height: 100vh; /* Ensure full viewport height */
+}
+
+.custom-home-page .content {
+flex-grow: 1; /* Allow content to grow and take remaining space */
+}
+
+.custom-home-page .card-body {
+flex-grow: 1; /* Ensure card body takes available space */
+}
+
+.custom-home-page .footer {
+padding: 20px;
+}
+.custom-home-page .link-container {
+display: flex;
+flex-direction: column;
+gap: 1rem; /* Space between each link card */
+}
+
+.custom-home-page .link-card {
+border: 1px solid #ddd; /* Light border for card effect */
+border-radius: 5px; /* Slightly rounded corners */
+padding: 15px; /* Padding inside each card */
+background-color: #f9f9f9; /* Light background color */
+transition: box-shadow 0.3s; /* Smooth shadow transition */
+}
+
+.custom-home-page .link-card:hover {
+box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Shadow on hover */
+}
+
+.custom-home-page .category-section {
+    padding: 20px 0;
+}
+
+.custom-home-page .category-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.custom-home-page .parent_category {
+    background: #fff; 
+    border: 1px solid #ddd; 
+    border-radius: 8px; 
+    padding: 20px;
+    margin: 10px; 
+    text-align: center; 
+    width: calc(33.33% - 20px); 
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
+    transition: transform 0.2s; 
+    cursor: pointer;
+}
+
+.custom-home-page .parent_category:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.custom-home-page .parent_category.active {
+    border-color: #007bff; 
+    background: #004c72; 
+    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2); 
+}
+
+.custom-home-page .parent_category.active .category-title {
+    font-weight: bold;
+    color: white; 
+}
+
+.custom-home-page .category-image {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+}
+
+.custom-home-page .category-title {
+    margin: 15px 0 10px; 
+    transition: color 0.2s;
+    font-size: 1.5em; 
+}
+
+.custom-home-page .btn-primary {
+    background-color: #007bff; 
+    color: white; 
+    padding: 10px 15px; 
+    text-decoration: none; 
+    border-radius: 5px; 
+    transition: background-color 0.2s;
+}
+
+.custom-home-page .btn-primary:hover {
+    background-color: #0056b3; 
+}
+
+@media (max-width: 768px) {
+    .custom-home-page .parent_category {
+        width: calc(50% - 20px); 
+    }
+}
+
+@media (max-width: 480px) {
+    .custom-home-page .parent_category {
+        width: 100%; 
+    }
+}
+
+@media (max-width: 1024px) {
+    .custom-home-page .category-title {
+        font-size: 1.3em; 
+    }
+}
+
 .dashboard-view .card:hover {
     transform: translateY(-5px);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    background: linear-gradient(135deg,#3d2283, #b33fd0);
+    background: linear-gradient(135deg,#004c72, #6c74bf);
     color: white; 
 }
 
@@ -370,7 +557,7 @@ body {
     background: #0094de; 
 }
 .custom-footer .footer-bottom {
-    padding: 20px 0; 
+    padding: 0 0; 
 }
 .custom-footer .list-unstyled li {
     margin-bottom: 10px;
@@ -411,13 +598,16 @@ body {
 }
 
 .input-box input:focus ~ label,
-.input-box input:valid ~ label {
+.input-box input:valid ~ label,
+.input-box textarea:focus ~ label,
+.input-box textarea:valid ~ label {
     top: -5px;
 }
 
 .input-box input,
 .input-box2 input,
-.input-box select {
+.input-box select,
+.input-box textarea {
     width: 100% !important;
     height: 100% !important;
     background: transparent !important;
@@ -451,4 +641,17 @@ h1 {
     font-weight: bold !important;
     margin-bottom: 20px !important;
     text-align: center !important;
+}
+
+.input-box textarea {
+    height: auto; /* Let the textarea height adjust based on content */
+    min-height: 100px; /* Minimum height for the textarea */
+    max-height: 300px; /* Optional: Limit max height */
+}
+
+/* Form css end */
+
+/* Button css */
+#createCategoryBtn, #createSubCategoryBtn {
+    font-size: 1.1rem; padding: 10px 20px; text-decoration: none; border-radius: 5px;
 }

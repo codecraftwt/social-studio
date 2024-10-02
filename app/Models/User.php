@@ -27,6 +27,7 @@ class User extends Authenticatable
         'current_location',  
         'mobile',            
         'profile_pic', 
+        'status',
     ];
 
     /**
@@ -51,5 +52,9 @@ class User extends Authenticatable
     public function isAdmin()
     {
         return $this->role_id === 1; // 1 for admin
+    }
+    public function role()
+    {
+        return $this->belongsTo(Role::class);
     }
 }

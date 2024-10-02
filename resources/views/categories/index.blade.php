@@ -3,15 +3,8 @@
 @section('content')
 
 
-<div class="container mt-4">
+<div class="container mt-4 mb-4">
     <h2>Categories</h2>
-
-    <!-- Display success message -->
-    @if (session('success'))
-        <div class="alert alert-success">
-            {{ session('success') }}
-        </div>
-    @endif
 
     <!-- Bulk Delete Form -->
     <form action="{{ route('categories.bulkDelete') }}" method="POST" class="mt-4">
@@ -22,6 +15,7 @@
                     <th><input type="checkbox" id="select-all"></th>
                     <th>#</th>
                     <th>Name</th>
+                    <th>Status</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -32,13 +26,22 @@
                         <td>{{ $category->id }}</td>
                         <td>{{ $category->name }}</td>
                         <td>
-                            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editCategoryModal" data-id="{{ $category->id }}" data-name="{{ $category->name }}">Edit</button>
+                            {{ $category->status == 1 ? 'Active' : 'Inactive' }}
+                            <button class="btn btn-sm {{ $category->status == 1 ? 'btn-warning' : 'btn-success' }} toggle-status" 
+                                    data-id="{{ $category->id }}">
+                                {{ $category->status == 1 ? 'Deactivate' : 'Activate' }}
+                            </button>
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-primary btn-log btn-sm" data-bs-toggle="modal" data-bs-target="#editCategoryModal" data-id="{{ $category->id }}" data-name="{{ $category->name }}">Edit</button>
                             <button type="button" class="btn btn-danger btn-sm delete-btn" data-id="{{ $category->id }}">Delete</button>
                         </td>
                     </tr>
                 @endforeach
             </tbody>
         </table>
+        <button type="button" class="btn btn-success" id="bulkActivate">Activate Selected</button>
+        <button type="button" class="btn btn-warning" id="bulkDeactivate">Deactivate Selected</button>
         <button type="submit" class="btn btn-danger">Delete Selected</button>
     </form>
 </div>
@@ -55,14 +58,14 @@
                 @csrf
                 @method('PUT')
                 <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="edit-name" class="form-label">Category Name</label>
-                        <input type="text" class="form-control" id="edit-name" name="name" required>
+                    <div class="input-box">
+                        <input type="text" name="name" id="edit-name" required >
+                        <label>Category Name</label>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Save changes</button>
+                    <button type="submit" class="btn btn-primary btn-log">Save changes</button>
                 </div>
             </form>
         </div>
@@ -119,5 +122,90 @@
             checkboxes.forEach(checkbox => checkbox.checked = this.checked);
         });
     });
+
+    $(document).ready(function() {
+    $('.toggle-status').click(function(event) {
+        event.preventDefault(); // Prevent the default action
+
+        var categoryId = $(this).data('id');
+        var button = $(this);
+        
+        $.ajax({
+            url: '/categories/' + categoryId + '/toggle-status',
+            method: 'POST',
+            data: {
+                _token: '{{ csrf_token() }}'
+            },
+            success: function(response) {
+                if (response.status == 1) {
+                    button.removeClass('btn-success').addClass('btn-warning').text('Deactivate');
+                    button.closest('td').contents().first().replaceWith('Active');
+                } else {
+                    button.removeClass('btn-warning').addClass('btn-success').text('Activate');
+                    button.closest('td').contents().first().replaceWith('Inactive');
+                }
+            },
+            error: function(xhr) {
+                alert(xhr.responseJSON.message || 'An error occurred while updating the status.');
+            }
+        });
+    });
+
+    $('#bulkActivate').click(function() {
+            var selectedCategories = $('input[name="categories[]"]:checked').map(function() {
+                return this.value;
+            }).get();
+
+            if (selectedCategories.length === 0) {
+                alert('Please select at least one category to activate.');
+                return;
+            }
+
+            $.ajax({
+                url: '/categories/bulk-toggle-status',
+                method: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    categories: selectedCategories,
+                    status: 1 // Activate
+                },
+                success: function(response) {
+                    location.reload(); // Reload the page to reflect the changes
+                },
+                error: function(xhr) {
+                    alert(xhr.responseJSON.message || 'An error occurred while activating the categories.');
+                }
+            });
+        });
+
+        // Bulk deactivate functionality
+        $('#bulkDeactivate').click(function() {
+            var selectedCategories = $('input[name="categories[]"]:checked').map(function() {
+                return this.value;
+            }).get();
+
+            if (selectedCategories.length === 0) {
+                alert('Please select at least one category to deactivate.');
+                return;
+            }
+
+            $.ajax({
+                url: '/categories/bulk-toggle-status',
+                method: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    categories: selectedCategories,
+                    status: 0 // Deactivate
+                },
+                success: function(response) {
+                    location.reload(); // Reload the page to reflect the changes
+                },
+                error: function(xhr) {
+                    alert(xhr.responseJSON.message || 'An error occurred while deactivating the categories.');
+                }
+            });
+        });
+
+});
 </script>
 @endsection

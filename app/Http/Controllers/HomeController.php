@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\Post;
 use App\Models\User;
 use App\Models\HeaderFooter;
+use App\Models\SubCategory;
 
 class HomeController extends Controller
 {
@@ -35,8 +36,8 @@ class HomeController extends Controller
             $totalUsers = User::count();
             $totalCategories = Category::count();
             $totalPosts = Post::count();
-        
-            return view('home', compact('totalUsers', 'totalCategories', 'categories', 'totalPosts'));
+            $SubCategory = SubCategory::count(); 
+            return view('home', compact('totalUsers', 'totalCategories', 'categories', 'totalPosts', 'SubCategory'));
         }else{
             return redirect()->route('login')->with('error', 'You need to log in to access the dashboard.');
         }
@@ -44,7 +45,9 @@ class HomeController extends Controller
 
     public function index()
     {
-        $categories = Category::all();
+        // $categories = Category::all();
+        $categories = Category::where('status', 1)->get();
+        $SubCategory = SubCategory::where('status', 1)->get();
         $today = now()->startOfDay(); // Get today's start of day
 
         // Add a 'new' flag to each category
@@ -53,32 +56,48 @@ class HomeController extends Controller
             return $category;
         });
 
-        return view('welcome', compact('categories'));
+        return view('welcome', compact('categories','SubCategory'));
     }
+
+    public function getSubCategories($categoryId)
+    {
+        try {
+            $subcategories = SubCategory::where('category_id', $categoryId)->get();
+            
+            // Check if subcategories exist
+            if ($subcategories->isEmpty()) {
+                return response()->json(['message' => 'No subcategories found for this category.'], 404);
+            }
+    
+            return response()->json($subcategories);
+        } catch (\Exception $e) {
+            \Log::error('Error fetching subcategories: ' . $e->getMessage());
+    
+            return response()->json(['error' => 'An error occurred while fetching subcategories.'], 500);
+        }
+    }
+    
 
     public function getPostsByCategory(Request $request)
     {
-        // $categoryId = $request->input('category_id');
-        // $posts = Post::where('category_id', $categoryId)->get();
-
-        // return response()->json($posts);
-
-         $categoryId = $request->input('category_id');
-    $userId = auth()->id(); // Get the logged-in user ID
-
-    // Retrieve the posts
-    $posts = Post::where('category_id', $categoryId)->get();
-
-    // Retrieve header and footer paths
-    $headerFooter = HeaderFooter::where('user_id', $userId)->first();
+        try {
+            $categoryId = $request->input('category_id');
+            $userId = auth()->id(); // Get the logged-in user ID
     
-
-    // Return posts and header/footer paths
-    return response()->json([
-        'posts' => $posts,
-        'headerPath' => $headerFooter ? $headerFooter->header_path : null,
-        'footerPath' => $headerFooter ? $headerFooter->footer_path : null,
-    ]);
-    }
+            $posts = Post::where('sub_category_id', $categoryId)->get();
+    
+            $headerFooter = HeaderFooter::where('user_id', $userId)->first();
+    
+            return response()->json([
+                'posts' => $posts,
+                'headerPath' => $headerFooter ? $headerFooter->header_path : null,
+                'footerPath' => $headerFooter ? $headerFooter->footer_path : null,
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error fetching posts by category: ' . $e->getMessage());
+    
+            return response()->json(['error' => 'An error occurred while fetching posts.'], 500);
+        }
+    }    
 
 }

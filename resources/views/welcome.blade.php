@@ -19,49 +19,9 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 </head>
-
 <body>
     <!-- Header -->
     @include('layouts.header')
-<style>
-    .image-crop {
-        width: 100%; /* Adjust as needed */
-        height: 490px; /* Set the desired height */
-        overflow: hidden; /* Hide overflow */
-        position: relative; /* Position for absolute children */
-    }
-
-    .image-crop img {
-        position: absolute;
-        top: -50%; /* Adjust this value to center the image */
-        left: 50%;
-        transform: translate(-50%, 0); /* Center the image */
-        min-width: 100%; /* Ensure the image covers the width */
-    }
-
-    .overlay {
-        position: absolute; /* Position the overlay */
-        top: 0; /* Cover the entire area */
-        left: 0;
-        width: 100%; /* Full width */
-        height: 100%; /* Full height */
-        background-color: rgba(0, 0, 0, 0.5); 
-        z-index: 1; 
-    }
-
-    .center-button {
-        position: absolute; /* Position absolutely within the container */
-        top: 50%; /* Center vertically */
-        left: 50%; /* Center horizontally */
-        transform: translate(-50%, -50%); /* Adjust for the button's size */
-        z-index: 2; /* Ensure the button is above the overlay */
-        background-color: #004c72; /* Button background color */
-    }
-    .btn-large {
-        padding: 15px 45px; /* Increase padding for larger button */
-        font-size: 18px;    /* Increase font size */
-    }
-</style>
     <div class="custom-home-page">
         <div class="image-section image-crop text-center mb-4">
             <img src="{{ asset('storage/images/social_media.jpg') }}" alt="Promotional Image" class="img-fluid">
@@ -94,30 +54,42 @@
             </div>
         </div>
 
+        <div class="category-section">
+            <div class="container">
+                <div class="category-container">
+                    @foreach ($categories as $category)
+                        <div class="parent_category" data-id="{{ $category->id }}" role="button" aria-label="Select category: {{ $category->name }}">
+                            <img src="{{ asset('storage/' . ($category->category_image ?? 'images/images2.jpg')) }}" alt="{{ $category->name }}" class="category-image" />
+                            <h3 class="category-title">{{ $category->name }}</h3>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+
+
         <!-- Main Content -->
         <div class="content">
-            <div class="container mt-4">
-                <div class="row">
+            <div class="container-fluid mt-4 mb-5">
+                <div class="row h-100">
                     <!-- Categories Sidebar -->
                     <div class="col-md-3 mb-3">
-                    <div class="card shadow-sm border-light rounded">
+                        <div class="card shadow-sm border-light rounded">
                             <div class="card-body">
                                 <h5 class="card-title mb-4 text-center">Select Categories</h5>
-                                <hr style="border-top: 2px solid #004c72; margin-bottom: 20px;"> <!-- Line below the title -->
-                                <ul class="list-unstyled">
-                                    @foreach ($categories as $category)
+                                <hr style="border-top: 2px solid #004c72; margin-bottom: 20px;">
+                                <ul class="list-unstyled" id="subcategories-list">
+                                    @foreach ($SubCategory as $subcategory)
                                         <li class="mb-3">
                                             <div class="d-flex justify-content-between align-items-center">
-                                                <span class="category-name" data-id="{{ $category->id }}" 
-                                                    style="{{ $category->isActive ? 'color: #004c72;' : 'color: inherit;' }}">
-                                                    {{ $category->name }}
+                                                <span class="category-name" data-id="{{ $subcategory->id }}">
+                                                    {{ $subcategory->sub_category_name }}
                                                 </span>
-                                                @if ($category->isNew)
+                                                @if ($subcategory->isNew)
                                                     <span class="badge bg-success text-white">New</span>
                                                 @endif
                                             </div>
-                                            <div class="category-description mt-2">
-                                            </div>
+                                            <div class="category-description mt-2"></div>
                                         </li>
                                     @endforeach
                                 </ul>
@@ -125,19 +97,46 @@
                         </div>
                     </div>
 
+                    <!-- Posts Section -->
                     <div class="col-md-9 mb-3">
-                        <div class="card">
-                            <div class="card-body">
-                                <h5 class="card-title">View Posts</h5>
-                                <div id="posts-content" class="post-container">
+                        <div class="card h-100">
+                            <div class="card-body d-flex flex-column">
+                                <div class="mb-3">
+                                    <span class="filter-option" data-type="poster_a">Poster</span>
+                                    <span class="filter-option" data-type="one_page">One Page</span>
+                                    <span class="filter-option" data-type="two_page">Two Page</span>
+                                    <span class="filter-option" data-type="link_a">Link</span>
                                 </div>
+                                <div id="posts-content" class="post-container flex-grow-1 d-none overflow-auto">
+                                    <!-- Posts will be loaded here -->
+                                </div>
+                                <div class="post-item poster_a d-none">
+                                    <div id="poster-content" class="row"></div> <!-- For displaying post images -->
+                                    <div class="post-item empty_a d-none">No content available</div>
+                                </div>
+                                <div class="post-item one_page d-none">
+                                    <div id="one-page-content"></div> <!-- For displaying one page PDF -->
+                                </div>
+                                <div class="post-item two_page d-none">
+                                    <div id="two-page-content"></div> <!-- For displaying two page PDF -->
+                                </div>
+                                <div class="post-item link_a d-none">
+                                    <div id="link-content"></div> <!-- For displaying links -->
+                                </div>
+                                <div class="post-item empty_a d-none">No content available</div>
+                            </div>
+                            <div id="full-image-display" class="d-none">
+                                <form action="" method="get">
+                                    <button type="submit" class="btn btn-secondary">Back</button>
+                                </form>
+                                <h2 id="full-image-title"></h2>
+                                <img id="full-image" src="" alt="Full Size" >
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
         <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-sm"> <!-- or modal-md for medium size -->
                 <div class="modal-content">
@@ -165,8 +164,48 @@
 
     <!-- JavaScript for AJAX -->
     <script>
+
         $(document).ready(function() {
-            $('.category-name').click(function() {
+            const filterOptions = document.querySelectorAll('.filter-option');
+            const postItems = document.querySelectorAll('.post-item');
+
+            filterOptions.forEach(option => {
+                option.addEventListener('click', () => {
+                    // Hide all post items first
+                    postItems.forEach(item => {
+                        item.classList.add('d-none');
+                    });
+
+                    // Remove active class from all options
+                    filterOptions.forEach(opt => {
+                        opt.classList.remove('active');
+                    });
+
+                    // Get the type from the clicked option
+                    const type = option.getAttribute('data-type');
+
+                    // Display the selected post item
+                    const selectedItem = document.querySelector(`.post-item.${type}`);
+                    if (selectedItem) {
+                        selectedItem.classList.remove('d-none');
+                    } else {
+                        // If no content is available for the selected type
+                        document.querySelector('.post-item.empty_a').classList.remove('d-none');
+                    }
+
+                    // Add active class to the clicked option
+                    option.classList.add('active');
+                });
+            });
+
+            // Default to displaying Poster content
+            const defaultOption = document.querySelector('.filter-option[data-type="poster_a"]');
+            if (defaultOption) {
+                defaultOption.click();
+            }
+
+            // $('.category-name').click(function() {
+            $('#subcategories-list').on('click', '.category-name', function() {
                 var categoryId = $(this).data('id');
 
                 $('.category-name').removeClass('selected');
@@ -179,51 +218,80 @@
                         category_id: categoryId
                     },
                     success: function(response) {
+                        // Clear previous content
+                        $('#poster-content').empty();
+                        $('#one-page-content').empty();
+                        $('#two-page-content').empty();
+                        $('#link-content').empty();
                         var headerPath = response.headerPath ? '{{ asset('storage') }}/' + response.headerPath : null;
                         var footerPath = response.footerPath ? '{{ asset('storage') }}/' + response.footerPath : null;
                         var posts = response.posts;
 
-                        var content = '';
                         posts.forEach(function(post) {
-                            var truncatedExplanation = post.post_explanation.substring(0, 100);
-                            var fullExplanation = post.post_explanation;
+                            // Display Post Image
+                            if (post.post_image) {
+                                $('#poster-content').append(`
+                                    <div class="col-md-4 mb-4"> <!-- Use Bootstrap's grid system -->
+                                        <div class="card">
+                                            <img src="{{ asset('storage') }}/${post.post_image}" alt="${post.post_title}" class="card-img-top poster-image" style="width: 100%; height: auto;">
+                                            <div class="card-body">
+                                                <h5 class="card-title">${post.post_title}</h5>
+                                                <button type="button" class="btn btn-log btn-primary download-btn" 
+                                                    data-image="{{ asset('storage') }}/${post.post_image}" 
+                                                    data-header="${headerPath}" 
+                                                    data-footer="${footerPath}" 
+                                                    data-post-id="${post.id}">Download Post</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `);
+                            }
 
-                            content += '<div class="post-item">';
-                            content += '<h5>' + post.post_title + '</h5>';
-                            content += '<p>Posted at: ' + new Date(post.created_at).toLocaleString() + '</p>';
-                            content += '<div class="post-content">';
-                            content += '<img src="' + '{{ asset('storage') }}/' + post.post_image + '" alt="' + post.post_title + '">';
-                            content += '<div class="post-explanation">' + truncatedExplanation + '...</div>';
-                            content += '<button type="button" class="btn btn-primary"><a class="download-btn" href="#" data-image="' + '{{ asset('storage') }}/' + post.post_image + '" data-header="' + headerPath + '" data-footer="' + footerPath + '" data-post-id="' + post.id + '">Download Post</a></button>';
-                            content += '</div>';
-                            content += '</div>';
+                            // Display Post PDF
+                            if (post.post_pdf) {
+                                $('#one-page-content').append(`
+                                    <div>
+                                        <h5>${post.post_title} (One Page)</h5>
+                                        <iframe src="{{ asset('storage') }}/${post.post_pdf}" style="width:100%; height:500px;" frameborder="0"></iframe>
+                                    </div>
+                                `);
+                                
+                                $('#two-page-content').append(`
+                                    <div>
+                                        <h5>${post.post_title} (Two Page)</h5>
+                                        <iframe src="{{ asset('storage') }}/${post.post_pdf}" style="width:100%; height:500px;" frameborder="0"></iframe>
+                                    </div>
+                                `);
+                            }
+
+                            // Display Link
+                            if (post.link) {
+                                $('#link-content').append(`
+                                    <div class="link-card mt-2">
+                                        <h5>${post.post_title}</h5>
+                                        <a href="${post.link}" target="_blank">${post.link}</a>
+                                    </div>
+                                `);
+                            }
                         });
-                        $('#posts-content').html(content);
+
+                        // Show the default view after loading posts
+                        document.querySelector('.filter-option[data-type="poster_a"]').click();
                     },
                     error: function() {
                         alert('Failed to load posts.');
                     }
                 });
-
-                $(document).on('click', '.view-more', function() {
-                    var explanation = $(this).siblings('.post-explanation');
-                    var fullExplanation = $(this).siblings('.full-explanation');
-
-                    explanation.hide();
-                    fullExplanation.show();
-                    $(this).text('View Less').removeClass('view-more').addClass('view-less');
-                });
-
-                $(document).on('click', '.view-less', function() {
-                    var explanation = $(this).siblings('.post-explanation');
-                    var fullExplanation = $(this).siblings('.full-explanation');
-
-                    explanation.show();
-                    fullExplanation.hide();
-                    $(this).text('View More').removeClass('view-less').addClass('view-more');
-                });
             });
+            $(document).on('click', '.poster-image', function() {
+                var imgSrc = $(this).attr('src');
+                var title = $(this).siblings('.card-body').find('.card-title').text();
 
+                $('#posts-content').addClass('d-none');
+                $('.post-item').hide();
+                $('#full-image').attr('src', imgSrc);
+                $('#full-image-display').removeClass('d-none');
+            });
             $(document).on('click', '.download-btn', function(e) {
                 e.preventDefault();
                 var imageUrl = $(this).data('image');
@@ -301,11 +369,6 @@
                         if (footerLoaded) {
                             ctx.drawImage(footer, (canvas.width - footer.width) / 2, canvas.height - footer.height); // Center footer
                         }
-                        // var imageDataUrl = canvas.toDataURL('image/png');
-                        // var link = document.createElement('a');
-                        // link.href = canvas.toDataURL('image/png');
-                        // link.download = 'post-image.png';
-                        // link.click();
 
                         var imageDataUrl = canvas.toDataURL('image/png');
                         document.getElementById('downloadedImage').src = imageDataUrl;
@@ -320,9 +383,6 @@
                             link.click();
                         };
 
-                        // document.getElementById('downloadedImage').src = imageDataUrl;
-                        // var imageModal = new bootstrap.Modal(document.getElementById('imageModal'));
-                        // imageModal.show();
 
                         var imageModal = new bootstrap.Modal(document.getElementById('imageModal'));
                         imageModal.show();
@@ -389,6 +449,53 @@
                 }
             });
         }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const categoryElements = document.querySelectorAll('.parent_category');
+
+            categoryElements.forEach(category => {
+                category.addEventListener('click', function() {
+                    const categoryId = this.getAttribute('data-id');
+
+                    // Remove active class from all categories
+                    categoryElements.forEach(cat => cat.classList.remove('active'));
+
+                    // Add active class to the clicked category
+                    this.classList.add('active');
+
+                    fetch(`/subcategories/${categoryId}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            const subcategoriesList = document.getElementById('subcategories-list');
+                            subcategoriesList.innerHTML = ''; // Clear previous subcategories
+
+                            data.forEach(subcategory => {
+                                const li = document.createElement('li');
+                                li.classList.add('mb-3');
+                                li.innerHTML = `
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="category-name" data-id="${subcategory.id}">
+                                            ${subcategory.sub_category_name}
+                                        </span>
+                                        ${subcategory.isNew ? '<span class="badge bg-success text-white">New</span>' : ''}
+                                    </div>
+                                    <div class="category-description mt-2"></div>
+                                `;
+                                subcategoriesList.appendChild(li);
+                            });
+                        });
+                });
+
+                // Keyboard navigation support
+                category.tabIndex = 0; // Make div focusable
+                category.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        this.click(); // Trigger click event on Enter or Space
+                    }
+                });
+            });
+        });
+
 
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('select-free-plan').addEventListener('click', function(e) {

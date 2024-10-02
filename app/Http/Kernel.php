@@ -68,5 +68,6 @@ class Kernel extends HttpKernel
     protected $routeMiddleware = [
         // Other middleware
         'check.download.limit' => \App\Http\Middleware\CheckDownloadLimit::class,
+        'admin' => \App\Http\Middleware\AdminMiddleware::class,
     ];
 }

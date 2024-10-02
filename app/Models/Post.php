@@ -12,13 +12,20 @@ class Post extends Model
     protected $fillable = [
         'link',
         'post_image',
+        'post_pdf',
         'post_title',
         'post_explanation',
+        'header_footer_access',
         'category_id',
+        'sub_category_id',
     ];
 
     public function category()
     {
         return $this->belongsTo(Category::class);
+    }
+    public function sub_category()
+    {
+        return $this->belongsTo(SubCategory::class);
     }
 }

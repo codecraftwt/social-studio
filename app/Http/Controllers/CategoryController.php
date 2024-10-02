@@ -8,7 +8,8 @@ class CategoryController extends Controller
 {
     public function create()
     {
-        return view('categories.create');
+        $categories = Category::all();
+        return view('categories.create', compact('categories'));
     }
 
     //
@@ -48,13 +49,25 @@ class CategoryController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required|unique:categories|max:255',
-        ]);
-
-        Category::create($request->all());
-        return redirect()->route('categories.index')->with('success', 'Category added successfully.');
-    }
+        try {
+            $request->validate([
+                'name' => 'required|unique:categories|max:255',
+                'category_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            ]);
+            $data = $request->all();
+    
+            if ($request->hasFile('category_image')) {
+                $imagePath = $request->file('category_image')->store('category_images', 'public'); // Store the image in the public disk
+                $data['category_image'] = $imagePath; // Add the image path to the data array
+            }
+    
+            Category::create($data);
+            return redirect()->route('categories.create')->with('success', 'Category added successfully.');
+    
+        } catch (\Exception $e) {
+            return redirect()->route('categories.create')->withErrors(['error' => 'Failed to add category: ' . $e->getMessage()]);
+        }
+    }    
 
     public function destroy($id)
     {
@@ -62,6 +75,36 @@ class CategoryController extends Controller
         $category->delete();
 
         return response()->json(['success' => 'Category deleted successfully.']);
+    }
+
+    public function toggleStatus($id)
+    {
+        try {
+            $category = Category::findOrFail($id);
+            $category->status = !$category->status; // Toggle status
+            $category->save();
+    
+            return response()->json(['success' => true, 'status' => $category->status]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'An error occurred while updating the status.'], 500);
+        }
+    }
+
+    public function bulkToggleStatus(Request $request)
+    {
+        $this->validate($request, [
+            'categories' => 'required|array',
+            'status' => 'required|boolean',
+        ]);
+
+        try {
+            $status = $request->status;
+            Category::whereIn('id', $request->categories)->update(['status' => $status]);
+
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'An error occurred while updating the status.'], 500);
+        }
     }
 
 }
