@@ -8,6 +8,7 @@ use App\Models\Post;
 use App\Models\User;
 use App\Models\HeaderFooter;
 use App\Models\SubCategory;
+use Carbon\Carbon;
 
 class HomeController extends Controller
 {
@@ -47,13 +48,18 @@ class HomeController extends Controller
     {
         // $categories = Category::all();
         $categories = Category::where('status', 1)->get();
-        $SubCategory = SubCategory::where('status', 1)->get();
+        // $SubCategory = SubCategory::where('status', 1)->get();
+        $SubCategory = SubCategory::whereHas('category', function ($query) {
+            $query->where('status', 1); // Only include active parent categories
+        })
+        ->where('status', 1)
+        ->get();
         $today = now()->startOfDay(); // Get today's start of day
 
         // Add a 'new' flag to each category
-        $categories = $categories->map(function ($category) use ($today) {
-            $category->isNew = $category->created_at->isSameDay($today);
-            return $category;
+        $categories = $categories->map(function ($subcategory) use ($today) {
+            $subcategory->isNew = $subcategory->created_at->isSameDay($today);
+            return $subcategory;
         });
 
         return view('welcome', compact('categories','SubCategory'));
@@ -62,7 +68,10 @@ class HomeController extends Controller
     public function getSubCategories($categoryId)
     {
         try {
-            $subcategories = SubCategory::where('category_id', $categoryId)->get();
+            // $subcategories = SubCategory::where('category_id', $categoryId)->get();
+            $subcategories = SubCategory::where('category_id', $categoryId)
+                ->where('status', 1) // Only include active subcategories
+                ->get();
             
             // Check if subcategories exist
             if ($subcategories->isEmpty()) {
@@ -84,7 +93,10 @@ class HomeController extends Controller
             $categoryId = $request->input('category_id');
             $userId = auth()->id(); // Get the logged-in user ID
     
-            $posts = Post::where('sub_category_id', $categoryId)->get();
+            // $posts = Post::where('sub_category_id', $categoryId)->get();
+            $posts = Post::where('sub_category_id', $categoryId)
+             ->where('status', 1) 
+             ->get();
     
             $headerFooter = HeaderFooter::where('user_id', $userId)->first();
     
@@ -99,5 +111,4 @@ class HomeController extends Controller
             return response()->json(['error' => 'An error occurred while fetching posts.'], 500);
         }
     }    
-
 }

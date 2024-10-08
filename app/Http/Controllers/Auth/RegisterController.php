@@ -33,7 +33,7 @@ class RegisterController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = '/home';
+    protected $redirectTo = '/';
 
     /**
      * Create a new controller instance.
@@ -61,7 +61,7 @@ class RegisterController extends Controller
             'postal_code' => ['required', 'string', 'max:10'],
             'current_location' => ['required', 'string', 'max:255'],
             'mobile' => ['required', 'string', 'max:15'],
-            'plan' => ['required', 'in:free,standard,premium'],
+            // 'plan' => ['required', 'in:free,standard,premium'],
             'profile_pic' => ['required', 'image', 'max:2048'],
         ]);
     }
@@ -74,7 +74,7 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
-        $plan = request()->input('plan', 'free');
+        // $plan = request()->input('plan', 'free');
         // Retrieve the Subscriber role
         $subscriberRole = Role::where('name', 'Subscriber')->first();
         $profilePicPath = $data['profile_pic']->store('profile_pics', 'public');
@@ -90,28 +90,32 @@ class RegisterController extends Controller
             'profile_pic' => $profilePicPath,
         ]);
         $user->notify(new WelcomeEmailNotification());
-        $expiryDate = null;
-        if ($plan === 'standard') {
-            // $expiryDate = now()->addMonth();
-            return redirect()->route('create-checkout-session', ['plan' => $plan]);
-        } elseif ($plan === 'premium') {
-            // $expiryDate = now()->addMonth();
-            return redirect()->route('create-checkout-session', ['plan' => $plan]);
-        }
+        // $expiryDate = null;
+        // if ($plan === 'standard') {
+        //     // $expiryDate = now()->addMonth();
+        //     return redirect()->route('create-checkout-session', ['plan' => $plan]);
+        // } elseif ($plan === 'premium') {
+        //     // $expiryDate = now()->addMonth();
+        //     return redirect()->route('create-checkout-session', ['plan' => $plan]);
+        // }
     
-        // Create the subscription record
-        if ($plan == 'free') { // Assuming free plan does not require a subscription record
-            Subscription::create([
-                'user_id' => $user->id,
-                'subscription_type' => $plan,
-                'download_limit' => '2',
-            ]);
-        }
+        // // Create the subscription record
+        // if ($plan == 'free') { // Assuming free plan does not require a subscription record
+        //     Subscription::create([
+        //         'user_id' => $user->id,
+        //         'subscription_type' => $plan,
+        //         'download_limit' => '2',
+        //     ]);
+        // }
       
-        if ($plan !== 'free') {
-            return redirect()->route('create-checkout-session', ['plan' => $plan]);
-        }
-    
+        // if ($plan !== 'free') {
+        //     return redirect()->route('create-checkout-session', ['plan' => $plan]);
+        // }
+        session()->flash('success', 'Register successful! Welcome , ' . $user->name . '!');
         return $user;
+        // session()->flash('success', 'Registration successful! Welcome!');
+
+        // // Redirect the user
+        // return redirect($this->redirectTo);
     }
 }

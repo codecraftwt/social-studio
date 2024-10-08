@@ -1,6 +1,6 @@
-<nav class="navbar navbar-expand-md home-page-header text-white shadow-sm">
+<nav class="navbar navbar-expand-md home-page-header custom-header text-white shadow-sm">
     <div class="container">
-        <a class="navbar-brand text-white" href="{{ url('/home') }}">
+        <a class="navbar-brand text-white" href="{{ url('/') }}">
             <img src="{{ asset('storage/images/walstar_logo.png') }}" alt="Logo" class="img-fluid" style="height: 50px;">
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
@@ -30,19 +30,47 @@
                         </li>
                     @endif
                     @else
+                        <li class="nav-item me-3">
+                            <a class="nav-link text-white mt-2" href="{{ url('/') }}">
+                                <span>Home</span>
+                            </a>
+                        </li>
+
+                        <li class="nav-item dropdown me-3">
+                            <a class="nav-link dropdown-toggle text-white mt-2" href="#" role="button" 
+                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span>Subscription</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="{{ url('/user-transactions') }}">Subscription History Preview</a></li>
+                                <li><a class="dropdown-item" href="{{ url('/plans') }}">Purchase New Subscription</a></li>
+                            </ul>
+                        </li>
+
+                        <!-- <li class="nav-item me-3">
+                            <a class="nav-link text-white mt-2" href="">
+                                <span>My Settings</span>
+                            </a>
+                        </li> -->
+
                         <li class="nav-item dropdown">
                             <a id="navbarDropdown" class="nav-link dropdown-toggle text-white" href="#" role="button" 
                                 data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
-                                <i class="bi bi-person-circle" style="font-size: 30px; color: white;"></i>
+                                <!-- <i class="bi bi-person-circle" style="font-size: 30px; color: white;"></i> -->
+                                @if (Auth::user()->profile_pic) <!-- Check if the user has a profile picture -->
+                                    <img src="{{ Storage::url(Auth::user()->profile_pic) }}" alt="Profile Picture" class="rounded-circle" style="width: 40px; height: 40px;">
+                                @else
+                                    <i class="bi bi-person-circle" style="font-size: 30px; color: white;"></i> <!-- Fallback icon -->
+                                @endif
                             </a>
 
                             <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                                 <span class="dropdown-item">Welcome: {{ Auth::user()->name }}</span>
-                                <a class="dropdown-item" href="#">
+                                <!-- <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#editProfileModal">
                                     <i class="bi bi-person"></i> User Profile
-                                </a>
-                                <a class="dropdown-item" href="#">
-                                    <i class="bi bi-gear"></i> Settings
+                                </a> -->
+                                <a class="dropdown-item" href="{{ url('/profile/profile') }}">
+                                    <i class="bi bi-gear"></i>  View Profile
                                 </a>
                                 <a class="dropdown-item" href="{{ route('logout') }}"
                                     onclick="event.preventDefault(); document.getElementById('logout-form').submit();">

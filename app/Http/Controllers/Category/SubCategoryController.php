@@ -27,8 +27,10 @@ class SubCategoryController extends Controller
     // Display subcategories (index method)
     public function index()
     {
-        $subcategories = SubCategory::with('category')->get();
-        $categories = Category::all();
+        // $subcategories = SubCategory::with('category')->get();
+        // $categories = Category::all();
+        $subcategories = SubCategory::with('category')->orderBy('created_at', 'desc')->get();
+        $categories = Category::orderBy('created_at', 'desc')->get();
         return view('categories.index_sub_category', compact('subcategories','categories'));
     }
 

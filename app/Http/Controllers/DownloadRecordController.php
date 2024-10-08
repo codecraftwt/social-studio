@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\DownloadRecord;
 use App\Models\Subscription;
+use App\Models\TransactionDetail;
 use Carbon\Carbon;
 
 class DownloadRecordController extends Controller
@@ -31,35 +32,72 @@ class DownloadRecordController extends Controller
         
         // Fetch the user's subscription
         $subscription = Subscription::where('user_id', $userId)->first();
-        
-        if (!$subscription) {
-            return response()->json([
-                'exceededLimit' => true,
-                'redirectUrl' => url('/choose-plan')
-            ]);
-        }
-        
-        // Determine the access duration based on the subscription type
-        $now = Carbon::now();
-        $expiryDate = Carbon::parse($subscription->expiry_date);
-        
-        // Check if the subscription is expired
-        if ($now->gt($expiryDate)) {
-            return response()->json([
-                'exceededLimit' => true,
-                'redirectUrl' => url('/choose-plan')
-            ]);
-        }
-        
-        // Check the download limit
-        $downloadLimit = $subscription->subscription_type === 'free' ? 150 : PHP_INT_MAX;
-        $downloadCount = DownloadRecord::where('user_id', $userId)->count();
-        
-        $exceededLimit = $downloadCount >= $downloadLimit;
+        $isAdmin = auth()->user()->role_id == 1;
+        if(!$isAdmin){
+            $transaction = TransactionDetail::where('user_id', $userId)->first();
 
+            // Check if the transaction exists and its status
+            if ($transaction) {
+                if ($transaction->status == '0') {
+                    return response()->json([
+                        'transactionLimita' => true,
+                        'redirectUrl' => url('/')
+                    ]);
+                }
+                if (Carbon::now()->gt($transaction->plan_expiry_date)) {
+                    return response()->json([
+                        'subscriptionOver' => true,
+                        'redirectUrl' => url('/plans')
+                    ]);
+                }
+            }else{
+                return response()->json([
+                    'transactionLimitb' => true,
+                    'redirectUrl' => url('/plans')
+                ]);
+            }
+            // if (!$subscription) {
+            //     return response()->json([
+            //         'exceededLimit' => true,
+            //         'redirectUrl' => url('/choose-plan')
+            //     ]);
+            // }
+            
+            // Determine the access duration based on the subscription type
+            // $now = Carbon::now();
+            // $expiryDate = Carbon::parse($subscription->expiry_date);
+            
+            // Check if the subscription is expired
+            // if ($now->gt($expiryDate)) {
+            //     return response()->json([
+            //         'exceededLimit' => true,
+            //         'redirectUrl' => url('/choose-plan')
+            //     ]);
+            // }
+            
+            // Check the download limit
+            // $downloadLimit = $subscription->subscription_type === 'free' ? 150 : PHP_INT_MAX;
+            // $downloadCount = DownloadRecord::where('user_id', $userId)->count();
+            
+            // $exceededLimit = $downloadCount >= $downloadLimit;
+
+            // return response()->json([
+            //     'exceededLimit' => $exceededLimit,
+            //     'redirectUrl' => $exceededLimit ? url('/choose-plan') : null
+            // ]);
+        }
+    }
+
+    public function getUserDetails(Request $request)
+    {
+        $user = auth()->user(); // Get the currently authenticated user
+        
         return response()->json([
-            'exceededLimit' => $exceededLimit,
-            'redirectUrl' => $exceededLimit ? url('/choose-plan') : null
+            'name' => $user->name,
+            'mobile' => $user->mobile,
+            'email' => $user->email,
+            'address'=> $user->address,
         ]);
     }
+
 }

@@ -28,7 +28,7 @@ class LoginController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = '/home';
+    protected $redirectTo = '/';
 
     /**
      * Create a new controller instance.
@@ -50,5 +50,10 @@ class LoginController extends Controller
                 'email' => ['Your account is inactive. Please contact support.'],
             ]);
         }
+        session()->flash('success', 'Login successful! Welcome back, ' . $user->name . '!');
+        if ($user->isAdmin()) { // Assuming you have an isAdmin method or a role field
+            return redirect()->route('dashboard'); // Adjust the route name as necessary
+        }
+
     }
 }

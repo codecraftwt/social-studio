@@ -37,12 +37,21 @@
                     <td>{{ $user->mobile }}</td>
                     <td>{{ $user->role->name }}</td>
                     <td>{{ $user->postal_code }}</td>
-                    <td>
+                    <!-- <td>
                         {{ $user->status == 1 ? 'Active' : 'Inactive' }}
                         <button class="btn btn-sm {{ $user->status == 1 ? 'btn-warning' : 'btn-success' }} toggle-status" 
                                 data-id="{{ $user->id }}">
                             {{ $user->status == 1 ? 'Deactivate' : 'Activate' }}
                         </button>
+                    </td> -->
+                    <td>
+                        <label class="switch post-switch">
+                            <input type="checkbox" class="toggle-status" 
+                                data-id="{{ $user->id }}" 
+                                {{ $user->status == 1 ? 'checked' : '' }} 
+                                onchange="toggleStatus(this)">
+                            <span class="slider round"></span>
+                        </label>
                     </td>
                     <td>
                         <button class="btn btn-warning edit-button btn-log" 
@@ -57,10 +66,22 @@
                                 data-profile-pic="{{ asset('storage/'.$user->profile_pic) }}">
                             Edit
                         </button>
-                        <form action="{{ route('users.destroy', $user->id) }}" method="POST" style="display:inline;">
+                        <button class="btn btn-warning view-user-button btn-log" 
+                                data-id="{{ $user->id }}" 
+                                data-name="{{ $user->name }}" 
+                                data-email="{{ $user->email }}" 
+                                data-postal-code="{{ $user->postal_code }}" 
+                                data-address="{{ $user->address }}" 
+                                data-mobile="{{ $user->mobile }}" 
+                                data-role="{{ $user->role_id }}"
+                                data-current_location="{{ $user->current_location }}" 
+                                data-profile-pic="{{ asset('storage/'.$user->profile_pic) }}">
+                            View
+                        </button>
+                        <form action="{{ route('users.destroy', $user->id) }}" method="POST" class="delete-user-form" style="display:inline;">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="btn btn-danger">Delete</button>
+                            <button type="button" class="btn btn-danger delete-button">Delete</button>
                         </form>
                     </td>
                 </tr>
@@ -165,8 +186,56 @@
         </div>
     </div>
 </div>
-
-
+<div class="modal fade" id="viewUserModal" tabindex="-1" aria-labelledby="viewUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewUserModalLabel">User Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-3">
+                    <img id="viewProfilePic" src="" alt="Profile Picture" class="img-fluid" style="width: 150px; height: 150px; object-fit: cover; border-radius: 50%;">
+                </div>
+                <div class="input-row">
+                    <div class="input-box">
+                        <strong>Name:</strong> <span id="viewName"></span>
+                    </div>
+                    <div class="input-box">
+                        <strong>Email:</strong> <span id="viewEmail"></span>
+                    </div>
+                </div>
+                <div class="input-row">
+                    <div class="input-box">
+                        <strong>Mobile:</strong> <span id="viewMobile"></span>
+                    </div>
+                    <div class="input-box">
+                        <strong>Role:</strong> <span id="viewRole"></span>
+                    </div>
+                </div>
+                <div class="input-row">
+                    <div class="input-box">
+                        <strong>Postal Code:</strong> <span id="viewPostalCode"></span>
+                    </div>
+                    <div class="input-box">
+                        <strong>Current Location:</strong> <span id="viewCurrentLocation"></span>
+                    </div>
+                </div>
+                <div class="input-row">
+                    <div class="input-box">
+                        <strong>Address:</strong> <span id="viewAddress"></span>
+                    </div>
+                    <div class="input-box">
+                        <strong>Status:</strong> <span id="viewStatus"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 <script>
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -196,6 +265,29 @@ document.addEventListener('DOMContentLoaded', function () {
             editUserModal.show();
         });
     });
+
+     const viewButtons = document.querySelectorAll('.view-user-button');
+    viewButtons.forEach(button => {
+        button.addEventListener('click', function () {
+            // Populate the modal fields
+            document.getElementById('viewName').innerText = this.getAttribute('data-name');
+            document.getElementById('viewEmail').innerText = this.getAttribute('data-email');
+            document.getElementById('viewMobile').innerText = this.getAttribute('data-mobile');
+            document.getElementById('viewRole').innerText = this.getAttribute('data-role');
+            document.getElementById('viewPostalCode').innerText = this.getAttribute('data-postal-code');
+            document.getElementById('viewCurrentLocation').innerText = this.getAttribute('data-current_location');
+            document.getElementById('viewAddress').innerText = this.getAttribute('data-address');
+            document.getElementById('viewStatus').innerText = this.getAttribute('data-status') == 1 ? 'Active' : 'Inactive';
+
+            // Display profile picture
+            const profilePic = document.getElementById('viewProfilePic');
+            profilePic.src = this.getAttribute('data-profile-pic') || "{{ asset('default_profile_pic.png') }}";
+
+            // Show the modal
+            const viewUserModal = new bootstrap.Modal(document.getElementById('viewUserModal'));
+            viewUserModal.show();
+        });
+    });
 });
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -213,29 +305,69 @@ document.addEventListener('DOMContentLoaded', function () {
             .map(checkbox => checkbox.value);
 
         if (selectedUsers.length === 0) {
-            alert('Please select at least one user to delete.');
-            return;
+            Swal.fire({
+                title: 'Warning',
+                text: 'Please select at least one user to delete.',
+                icon: 'warning',
+                confirmButtonColor: '#3085d6',
+                confirmButtonText: 'OK'
+            });
         }
 
-        if (confirm('Are you sure you want to delete the selected users?')) {
-            fetch('/users/bulk-delete', {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ user_ids: selectedUsers })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    window.location.reload(); // Refresh the page
-                } else {
-                    alert('Error deleting users.');
-                }
-            })
-            .catch(error => console.error('Error:', error));
-        }
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'Do you really want to delete the selected users?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete them!',
+            cancelButtonText: 'No, cancel!',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch('/users/bulk-delete', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}', // Laravel CSRF token
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ user_ids: selectedUsers }) // Send selected user IDs
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        // If deletion is successful, refresh the page or update the UI
+                        window.location.reload(); // Refresh the page
+                    } else {
+                        // Handle the error case if deletion was not successful
+                        Swal.fire({
+                            title: 'Error!',
+                            text: 'Internal Server Error Occurred.',
+                            icon: 'error',
+                            confirmButtonColor: '#d33',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'An unexpected error occurred. Please try again later.',
+                        icon: 'error',
+                        confirmButtonColor: '#d33',
+                        confirmButtonText: 'OK'
+                    });
+                });
+            } else {
+                console.log('Deletion canceled');
+            }
+        });
     });
 });
 
@@ -261,7 +393,14 @@ $(document).ready(function() {
                 }
             },
             error: function(xhr) {
-                alert('An error occurred: ' + xhr.responseText);
+                // alert('An error occurred: ' + xhr.responseText);
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Internal Server Error Occured.',
+                    icon: 'error',
+                    confirmButtonColor: '#d33',
+                    confirmButtonText: 'OK'
+                });
             }
         });
     });
@@ -278,8 +417,13 @@ $(document).ready(function() {
         }).get();
 
         if (selectedUsers.length === 0) {
-            alert('Please select at least one user to activate.');
-            return;
+            Swal.fire({
+                title: 'Warning',
+                text: 'Please select at least one user to delete.',
+                icon: 'warning',
+                confirmButtonColor: '#3085d6',
+                confirmButtonText: 'OK'
+            });
         }
 
         $.ajax({
@@ -293,11 +437,25 @@ $(document).ready(function() {
                 if (response.success) {
                     location.reload(); 
                 } else {
-                    alert('Failed to activate users.');
+                    // alert('Failed to activate users.');
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'Internal Server Error Occured.',
+                        icon: 'error',
+                        confirmButtonColor: '#d33',
+                        confirmButtonText: 'OK'
+                    });
                 }
             },
             error: function(xhr) {
-                alert('An error occurred: ' + xhr.responseJSON.message);
+                // alert('An error occurred: ' + xhr.responseJSON.message);
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Internal Server Error Occured.',
+                    icon: 'error',
+                    confirmButtonColor: '#d33',
+                    confirmButtonText: 'OK'
+                });
             }
         });
     });
@@ -308,8 +466,13 @@ $(document).ready(function() {
         }).get();
 
         if (selectedUsers.length === 0) {
-            alert('Please select at least one user to deactivate.');
-            return;
+            Swal.fire({
+                title: 'Warning',
+                text: 'Please select at least one user to delete.',
+                icon: 'warning',
+                confirmButtonColor: '#3085d6',
+                confirmButtonText: 'OK'
+            });
         }
 
         $.ajax({
@@ -323,11 +486,25 @@ $(document).ready(function() {
                 if (response.success) {
                     location.reload(); 
                 } else {
-                    alert('Failed to deactivate users.');
+                    // alert('Failed to deactivate users.');
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'Internal Server Error Occured.',
+                        icon: 'error',
+                        confirmButtonColor: '#d33',
+                        confirmButtonText: 'OK'
+                    });
                 }
             },
             error: function(xhr) {
-                alert('An error occurred: ' + xhr.responseJSON.message);
+                // alert('An error occurred: ' + xhr.responseJSON.message);
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Internal Server Error Occured.',
+                    icon: 'error',
+                    confirmButtonColor: '#d33',
+                    confirmButtonText: 'OK'
+                });
             }
         });
     });
@@ -338,6 +515,28 @@ $(document).ready(function() {
         responsive: true,
     });
 });
+
+document.querySelectorAll('.delete-user-form').forEach(form => {
+        form.querySelector('.delete-button').addEventListener('click', function(event) {
+            event.preventDefault(); // Prevent the default form submission
+            
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'Do you really want to delete this user?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'No, cancel!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // If confirmed, submit the form
+                    form.submit();
+                }
+            });
+        });
+    });
 </script>
 
 @endsection

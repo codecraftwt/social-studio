@@ -15,7 +15,8 @@ class CategoryController extends Controller
     //
     public function index()
     {
-        $categories = Category::all();
+        // $categories = Category::all();
+        $categories = Category::orderBy('created_at', 'desc')->get();
         return view('categories.index', compact('categories'));
     }
 
@@ -25,14 +26,40 @@ class CategoryController extends Controller
         return view('categories.edit', compact('category'));
     }
 
+    // public function update(Request $request, Category $category)
+    // {
+    //     $request->validate([
+    //         'name' => 'required|unique:categories,name,' . $category->id . '|max:255',
+    //     ]);
+
+    //     $category->update($request->all());
+    //     return redirect()->route('categories.index')->with('success', 'Category updated successfully.');
+    // }
+
     public function update(Request $request, Category $category)
     {
         $request->validate([
             'name' => 'required|unique:categories,name,' . $category->id . '|max:255',
+            'category_image' => 'nullable|image|mimes:jpg,jpeg,png,bmp,gif,svg|max:2048', // Validation for image
         ]);
 
-        $category->update($request->all());
-        return redirect()->route('categories.index')->with('success', 'Category updated successfully.');
+        try {
+            if ($request->hasFile('category_image')) {
+                if ($category->category_image) {
+                    Storage::disk('public')->delete($category->category_image);
+                }
+
+                $filePath = $request->file('category_image')->store('categories', 'public');
+                $category->category_image = $filePath;
+            }
+
+            $category->name = $request->input('name');
+            $category->save();
+
+            return redirect()->route('categories.index')->with('success', 'Category updated successfully.');
+        } catch (\Exception $e) {
+            return redirect()->route('categories.index')->with('error', 'An error occurred while updating the category: ' . $e->getMessage());
+        }
     }
 
     public function bulkDelete(Request $request)

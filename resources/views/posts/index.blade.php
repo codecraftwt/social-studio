@@ -49,12 +49,12 @@
                         @endif
                     </td>
                     <td>
-                        <input type="checkbox" class="toggle-status" 
-                            data-id="{{ $post->id }}" 
-                            data-toggle="toggle" 
-                            data-on="Active" 
-                            data-off="Inactive" 
-                            {{ $post->status == 1 ? 'checked' : '' }}>
+                        <label class="switch post-switch">
+                            <input type="checkbox" class="toggle-status" 
+                                data-id="{{ $post->id }}" 
+                                {{ $post->status == 1 ? 'checked' : '' }}>
+                            <span class="slider round"></span>
+                        </label>
                     </td>
                     <td>
                         @if($post->post_image)
@@ -63,9 +63,9 @@
                             No Image
                         @endif
                     </td>
-                    <td>
+                    <td class="flex-buttons">
                         <button type="button" class="btn btn-log btn-sm" data-bs-toggle="modal" data-bs-target="#editPostModal" data-id="{{ $post->id }}" data-post_explanation="{{$post->post_explanation }}" data-title="{{ $post->post_title }}" data-link="{{ $post->link }}" data-category="{{ $post->category_id }}" data-sub_category="{{ $post->sub_category_id}}" data-image="{{ $post->post_image }}">Edit</button>
-                        <button type="button" class="btn btn-danger btn-sm delete-btn" data-id="{{ $post->id }}">Delete</button>
+                        <button type="button" class="btn btn-danger btn-sm delete-btn mt-2" data-id="{{ $post->id }}">Delete</button>
                     </td>
                 </tr>
             @endforeach
@@ -218,7 +218,7 @@
                         </div>
                     </div>
                     <div class="row mb-3 mt-5">
-                        <div class="col-md-12">
+                        <div class="col-md-12 mt-3">
                             <div class="input-box2">
                                 <label>Update PDF File (optional)</label>
                                 <input type="file" class="@error('post_pdf') is-invalid @enderror" id="edit-pdf_file" name="post_pdf" accept="application/pdf">
@@ -333,41 +333,71 @@
             const selectedPosts = Array.from(document.querySelectorAll('.post-checkbox:checked')).map(checkbox => checkbox.value);
 
             if (selectedPosts.length === 0) {
-                alert('Please select at least one post to delete.');
-                return;
-            }
-
-            if (confirm('Are you sure you want to delete the selected posts?')) {
-                fetch('{{ route('posts.bulkDelete') }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    },
-                    body: JSON.stringify({ posts: selectedPosts })
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.success) {
-                        document.getElementById('successMessage').textContent = data.message;
-                        document.getElementById('successMessage').classList.remove('d-none');
-                        setTimeout(() => {
-                            location.reload();
-                        }, 2000);
-                    } else {
-                        alert(data.message || 'An error occurred while deleting posts.');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred: ' + error.message);
+                Swal.fire({
+                    title: 'Warning',
+                    text: 'Please select at least one post to delete.',
+                    icon: 'warning',
+                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: 'OK'
                 });
             }
+
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'Do you really want to delete the selected posts?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete them!',
+                cancelButtonText: 'No, cancel!',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch('{{ route('posts.bulkDelete') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({ posts: selectedPosts })
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            document.getElementById('successMessage').textContent = data.message;
+                            document.getElementById('successMessage').classList.remove('d-none');
+                            setTimeout(() => {
+                                location.reload();
+                            }, 2000);
+                        } else {
+                            Swal.fire({
+                                title: 'Error',
+                                text: data.message || 'An error occurred while deleting posts.',
+                                icon: 'error',
+                                confirmButtonColor: '#d33',
+                                confirmButtonText: 'OK'
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'An error occurred: ' + error.message,
+                            icon: 'error',
+                            confirmButtonColor: '#d33',
+                            confirmButtonText: 'OK'
+                        });
+                    });
+                } else {
+                    console.log('Deletion canceled');
+                }
+            });
         });
         document.getElementById('select-all').addEventListener('click', function() {
             var checkboxes = document.querySelectorAll('input[name="posts[]"]');
@@ -378,29 +408,74 @@
             var postId = $(this).data('id');
             var newStatus = this.checked ? 1 : 0; // Set status based on checkbox state
 
-            if (confirm('Are you sure you want to ' + (newStatus == 1 ? 'activate' : 'deactivate') + ' this post?')) {
-                $.ajax({
-                    url: '/posts/' + postId + '/toggle-status', // Make sure this route exists
-                    method: 'PATCH',
-                    data: {
-                        status: newStatus,
-                        _token: $('meta[name="csrf-token"]').attr('content')
-                    },
-                    success: function(response) {
-                        if (response.success) {
-                            alert('Status updated successfully!');
-                        } else {
-                            alert('An error occurred while updating the status.');
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'You are about to ' + (newStatus == 1 ? 'activate' : 'deactivate') + ' this post.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, proceed!',
+                cancelButtonText: 'No, cancel!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Show a loading indicator
+                    Swal.fire({
+                        title: 'Processing...',
+                        text: 'Please wait while we update the status.',
+                        allowOutsideClick: false,
+                        onBeforeOpen: () => {
+                            Swal.showLoading();
                         }
-                    },
-                    error: function() {
-                        alert('An error occurred while updating the status.');
-                    }
-                });
-            } else {
-                // Revert toggle if user cancels
-                $(this).prop('checked', !this.checked);
-            }
+                    });
+
+                    $.ajax({
+                        url: '/posts/' + postId + '/toggle-status', // Make sure this route exists
+                        method: 'PATCH',
+                        data: {
+                            status: newStatus,
+                            _token: $('meta[name="csrf-token"]').attr('content')
+                        },
+                        success: function(response) {
+                            Swal.close(); // Close the loading indicator
+
+                            if (response.success) {
+                                Swal.fire({
+                                    title: 'Success!',
+                                    text: 'Status updated successfully!',
+                                    icon: 'success',
+                                    confirmButtonColor: '#3085d6',
+                                    confirmButtonText: 'OK'
+                                }).then(() => {
+                                    // Optionally, reload the page or update the UI
+                                    location.reload();
+                                });
+                            } else {
+                                Swal.fire({
+                                    title: 'Error!',
+                                    text: 'Internal Server Error Occurred.',
+                                    icon: 'error',
+                                    confirmButtonColor: '#d33',
+                                    confirmButtonText: 'OK'
+                                });
+                            }
+                        },
+                        error: function() {
+                            Swal.close(); // Close the loading indicator
+                            Swal.fire({
+                                title: 'Error!',
+                                text: 'Internal Server Error Occurred.',
+                                icon: 'error',
+                                confirmButtonColor: '#d33',
+                                confirmButtonText: 'OK'
+                            });
+                        }
+                    });
+                } else {
+                    // Revert toggle if user cancels
+                    $(this).prop('checked', !this.checked);
+                }
+            });
         });
 
         $('#bulkActivate').click(function() {
@@ -409,8 +484,13 @@
             }).get();
 
             if (selectedposts.length === 0) {
-                alert('Please select at least one category to activate.');
-                return;
+                Swal.fire({
+                    title: 'Warning',
+                    text: 'Please select at least one category to activate.',
+                    icon: 'warning',
+                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: 'OK'
+                });
             }
 
             $.ajax({
@@ -425,7 +505,14 @@
                     location.reload(); // Reload the page to reflect the changes
                 },
                 error: function(xhr) {
-                    alert(xhr.responseJSON.message || 'An error occurred while activating the posts.');
+                    // alert(xhr.responseJSON.message || 'An error occurred while activating the posts.');
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'Internal Server Error Occured.',
+                        icon: 'error',
+                        confirmButtonColor: '#d33',
+                        confirmButtonText: 'OK'
+                    });
                 }
             });
         });
@@ -437,8 +524,13 @@
             }).get();
 
             if (selectedposts.length === 0) {
-                alert('Please select at least one category to deactivate.');
-                return;
+                Swal.fire({
+                    title: 'Warning',
+                    text: 'Please select at least one category to activate.',
+                    icon: 'warning',
+                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: 'OK'
+                });
             }
 
             $.ajax({
@@ -453,7 +545,14 @@
                     location.reload(); // Reload the page to reflect the changes
                 },
                 error: function(xhr) {
-                    alert(xhr.responseJSON.message || 'An error occurred while deactivating the posts.');
+                    // alert(xhr.responseJSON.message || 'An error occurred while deactivating the posts.');
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'Internal Server Error Occured.',
+                        icon: 'error',
+                        confirmButtonColor: '#d33',
+                        confirmButtonText: 'OK'
+                    });
                 }
             });
         });
@@ -473,11 +572,24 @@
                         if (response.success) {
                             $(`input[value="${postId}"]`).closest('tr').remove();
                         } else {
-                            alert('Error deleting post.');
+                            Swal.fire({
+                                title: 'Error!',
+                                text: 'Internal Server Error Occured.',
+                                icon: 'error',
+                                confirmButtonColor: '#d33',
+                                confirmButtonText: 'OK'
+                            });
                         }
                     },
                     error: function(xhr) {
-                        alert('Error deleting post: ' + xhr.responseJSON.message);
+                        // alert('Error deleting post: ' + xhr.responseJSON.message);
+                        Swal.fire({
+                            title: 'Error!',
+                            text: 'Internal Server Error Occured.',
+                            icon: 'error',
+                            confirmButtonColor: '#d33',
+                            confirmButtonText: 'OK'
+                        });
                     }
                 });
             }
@@ -499,7 +611,6 @@
     function toggleRequiredFields(input) {
             const headerFooterAccess = document.getElementById('header_footer_access');
             const borderColor = document.getElementById('border_color');
-             alert(borderColor);
             if (input.files.length > 0) {
                 headerFooterAccess.setAttribute('required', 'required');
                 borderColor.setAttribute('required', 'required');

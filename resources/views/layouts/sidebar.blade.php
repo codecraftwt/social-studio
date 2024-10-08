@@ -3,12 +3,14 @@
         <i class="bi bi-x-square"></i>
     </button>
     <div class="text-center mb-1">
-        <img src="{{ asset('storage/images/walstar_logo.png') }}" alt="Logo" class="img-fluid logo">
+        <a href="{{ url('/') }}">
+            <img src="{{ asset('storage/images/walstar_logo.png') }}" alt="Logo" class="img-fluid logo">
+        </a>
     </div>
     <hr class="my-4">
          <ul class="nav flex-column mt-2">
             <li class="nav-item">
-                <a class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}" href="{{ route('home') }}">
+                <a class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
                     <i class="bi bi-house me-2"></i>
                     <span class="sidebar-text">Dashboard</span>
                 </a>
@@ -104,12 +106,21 @@
                 <span class="sidebar-text">Create Header/Footer</span>
             </a>
         </li>
-        <li class="nav-item">
-            <a class="nav-link d-flex" href="#">
-                <i class="bi bi-gear me-2"></i>
-                <span class="sidebar-text">Settings</span>
-            </a>
-        </li>
+        @if(auth()->check() && auth()->user()->isAdmin())
+            <li class="nav-item">
+                <a class="nav-link d-flex" href="{{ route('payments.create')}}">
+                    <i class="bi bi-gear me-2"></i>
+                    <span class="sidebar-text">Settings</span>
+                </a>
+            </li>
+        @else
+            <li class="nav-item">
+                <a class="nav-link d-flex" href="{{ route('profile.profile') }}">
+                    <i class="bi bi-gear me-2"></i>
+                    <span class="sidebar-text">Settings</span>
+                </a>
+            </li>
+        @endif
     </ul>
 </aside>
 
@@ -133,8 +144,19 @@
         });
     }
 });
+// document.getElementById('toggleSidebarmobile').addEventListener('click', function(event) {
+//     event.stopPropagation(); // Prevent the click from bubbling up
+// });
+
+function isMobileView() {
+    return window.innerWidth < 768; // Adjust this value as necessary
+}
+
+// Add event listener for the toggle button
 document.getElementById('toggleSidebarmobile').addEventListener('click', function(event) {
-    event.stopPropagation(); // Prevent the click from bubbling up
+    if (isMobileView()) {
+        event.stopPropagation(); // Prevent the click from bubbling up
+    }
 });
 
 // Close the dropdown when clicking outside

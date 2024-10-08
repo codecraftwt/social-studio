@@ -16,6 +16,7 @@
                     <th>Transaction ID</th>
                     <th>Subscription Type</th>
                     <th>Payment Date</th>
+                    <th>Expiry Date</th>
                     <th>Payment Screenshot</th>
                     <th>Status</th>
                     <th>Actions</th>
@@ -30,6 +31,7 @@
                         <td>{{ $transaction->transaction_id }}</td>
                         <td>{{ $transaction->subscription_type }}</td>
                         <td>{{ $transaction->payment_date ? $transaction->payment_date->format('Y-m-d') : 'N/A' }}</td>
+                        <td>{{ $transaction->plan_expiry_date }}</td>
                         <td>
                             @if ($transaction->payment_screenshot)
                                 <a href="{{ Storage::url($transaction->payment_screenshot) }}" target="_blank">View Screenshot</a>
@@ -51,11 +53,8 @@
             </tbody>
         </table>
         <button type="submit" class="btn btn-success mt-3">Approve Selected</button>
-    </form>
-
-    <form action="{{ route('transactions.bulkDelete') }}" method="POST" id="bulkDeleteForm" style="margin-top: 20px;">
-        @csrf
-        <button type="submit" class="btn btn-danger">Delete Selected</button>
+        <button type="button" class="btn btn-warning mt-3" id="bulkDeactivateButton">Deactivate Selected</button>
+        <button type="button" class="btn btn-danger mt-3" id="bulkDeleteButton">Delete Selected</button>
     </form>
 </div>
 
@@ -79,11 +78,27 @@ $(document).ready(function() {
                 _token: '{{ csrf_token() }}'
             },
             success: function(response) {
-                alert('Transaction approved!');
-                location.reload();
+                // alert('Transaction approved!');
+                // location.reload();
+                Swal.fire({
+                    title: 'Success',
+                    text: 'Transaction approved!',
+                    icon: 'success',
+                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    location.reload();
+                });
             },
             error: function(error) {
-                alert('An error occurred while approving the transaction.');
+                // alert('An error occurred while approving the transaction.');
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Internal Server Error Occured.',
+                    icon: 'error',
+                    confirmButtonColor: '#d33',
+                    confirmButtonText: 'OK'
+                });
             }
         });
     });
@@ -98,11 +113,25 @@ $(document).ready(function() {
                 _token: '{{ csrf_token() }}'
             },
             success: function(response) {
-                alert('Transaction rejected!');
-                location.reload();
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Transaction rejected!',
+                    icon: 'error',
+                    confirmButtonColor: '#d33',
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    location.reload();
+                });
             },
             error: function(error) {
-                alert('An error occurred while rejecting the transaction.');
+                // alert('An error occurred while rejecting the transaction.');
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Internal Server Error Occured.',
+                    icon: 'error',
+                    confirmButtonColor: '#d33',
+                    confirmButtonText: 'OK'
+                });
             }
         });
     });
@@ -110,23 +139,176 @@ $(document).ready(function() {
     // Delete button click
     $('.delete-btn').click(function() {
         const transactionId = $(this).data('id');
-        if (confirm('Are you sure you want to delete this transaction?')) {
-            $.ajax({
-                url: `/transactions/${transactionId}`,
-                method: 'DELETE',
-                data: {
-                    _token: '{{ csrf_token() }}'
-                },
-                success: function(response) {
-                    alert('Transaction deleted!');
-                    location.reload();
-                },
-                error: function(error) {
-                    alert('An error occurred while deleting the transaction.');
-                }
-            });
-        }
+        // Use SweetAlert for confirmation
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'Do you really want to delete this transaction?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'No, cancel!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: `/transactions/${transactionId}`,
+                    method: 'DELETE',
+                    data: {
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        Swal.fire({
+                            title: 'Success',
+                            text: 'Transaction deleted!',
+                            icon: 'success',
+                            confirmButtonColor: '#3085d6',
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            location.reload(); // Reload the page to reflect changes
+                        });
+                    },
+                    error: function(xhr) {
+                        Swal.fire({
+                            title: 'Error!',
+                            text: 'An error occurred while deleting the transaction: ' + (xhr.responseJSON.message || 'Please try again.'),
+                            icon: 'error',
+                            confirmButtonColor: '#d33',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                });
+            } else {
+                console.log('Deletion canceled');
+            }
+        });
     });
+
+    $('#bulkDeleteButton').click(function() {
+        const selectedTransactions = $('input[name="transactions[]"]:checked').map(function() {
+            return $(this).val();
+        }).get();
+
+        console.log(selectedTransactions);
+
+        if (selectedTransactions.length === 0) {
+            Swal.fire({
+                title: 'No Selection!',
+                text: 'Please select at least one transaction to delete.',
+                icon: 'warning',
+                confirmButtonColor: '#3085d6',
+                confirmButtonText: 'OK'
+            });
+            return;
+        }
+
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'Do you really want to delete the selected transactions?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete them!',
+            cancelButtonText: 'No, cancel!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // AJAX request to delete the selected transactions
+                $.ajax({
+                    url: $('#bulkDeleteForm').attr('action'), // Use the form's action URL
+                    type: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}', // Add CSRF token for security
+                        transactions: selectedTransactions // Send the selected transaction IDs
+                    },
+                    success: function(response) {
+                        // Handle the success response
+                        Swal.fire({
+                            title: 'Deleted!',
+                            text: 'Selected transactions have been deleted.',
+                            icon: 'success',
+                            confirmButtonColor: '#3085d6',
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            location.reload(); // Reload the page to reflect changes
+                        });
+                    },
+                    error: function(xhr) {
+                        // Handle the error response
+                        Swal.fire({
+                            title: 'Error!',
+                            text: xhr.responseJSON.message || 'An error occurred while deleting transactions.',
+                            icon: 'error',
+                            confirmButtonColor: '#d33',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                });
+            }
+        });
+    });
+
+    $('#bulkDeactivateButton').click(function() {
+        const selectedTransactions = $('input[name="transactions[]"]:checked').map(function() {
+            return $(this).val();
+        }).get();
+
+        console.log(selectedTransactions);
+
+        if (selectedTransactions.length === 0) {
+            Swal.fire({
+                title: 'No Selection!',
+                text: 'Please select at least one transaction to deactivate.',
+                icon: 'warning',
+                confirmButtonColor: '#3085d6',
+                confirmButtonText: 'OK'
+            });
+            return;
+        }
+
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'Do you really want to deactivate the selected transactions?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, deactivate them!',
+            cancelButtonText: 'No, cancel!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '{{ route("transactions.bulkDeactivate") }}', // Use the new route
+                    type: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}', // Add CSRF token for security
+                        transactions: selectedTransactions // Send the selected transaction IDs
+                    },
+                    success: function(response) {
+                        Swal.fire({
+                            title: 'Deactivated!',
+                            text: 'Selected transactions have been deactivated.',
+                            icon: 'success',
+                            confirmButtonColor: '#3085d6',
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            location.reload(); // Reload the page to reflect changes
+                        });
+                    },
+                    error: function(xhr) {
+                        Swal.fire({
+                            title: 'Error!',
+                            text: xhr.responseJSON.message || 'An error occurred while deactivating transactions.',
+                            icon: 'error',
+                            confirmButtonColor: '#d33',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                });
+            }
+        });
+    });
+
 });
 </script>
 

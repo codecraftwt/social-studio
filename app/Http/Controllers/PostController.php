@@ -14,12 +14,14 @@ class PostController extends Controller
 
     public function index()
     {
-        $posts = Post::with(['category', 'sub_category'])->get();
+        $posts = Post::with(['category', 'sub_category'])->orderBy('created_at', 'desc')->get();
         if ($posts->isEmpty()) {
             $posts = collect(); 
         }
-        $SubCategory = SubCategory::all(); 
-        $categories = Category::all(); 
+        // $SubCategory = SubCategory::all(); 
+        // $categories = Category::all(); 
+        $SubCategory = SubCategory::orderBy('created_at', 'desc')->get(); 
+        $categories = Category::orderBy('created_at', 'desc')->get(); 
         return view('posts.index', compact('posts', 'categories', 'SubCategory')); 
     }
 
@@ -63,7 +65,13 @@ class PostController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'link' => 'nullable|url',
+            // 'link' => 'nullable|url',
+            // 'link' => 'required|string|max:500',
+            'link' => [
+                    'required',
+                    'regex:/^(http|https):\/\/[^\s$.?#].[^\s]*$/',
+                    'max:500',
+                ],
             'post_image' => 'nullable|image|mimes:jpg,png,jpeg,gif|max:2048',
             'post_pdf' => 'nullable|file|mimes:pdf|max:2048',
             'post_title' => 'required|max:255',
@@ -245,9 +253,9 @@ class PostController extends Controller
         $img = imagecreatefromstring(file_get_contents($image->getRealPath()));
         
         $canvasWidth = 750; // Desired width
-        $canvasHeight = 600; // Total desired height
-        $headerHeight = 80; // Header height
-        $footerHeight = 80; // Footer height
+        $canvasHeight = 800; // Total desired height
+        $headerHeight = 120; // Header height
+        $footerHeight = 120; // Footer height
     
         // Create a blank canvas
         $canvas = imagecreatetruecolor($canvasWidth, $canvasHeight);
@@ -352,19 +360,19 @@ class PostController extends Controller
                 imageline($canvas, $lineX + $i, $lineY1, $lineX + $i, $lineY2, $borderColor);
             }
 
-            $lineX = $canvasWidth - 100; // 100 pixels from the right
-            $lineY1 = $canvasHeight - $footerHeight; // Start from the top of the footer
-            $lineY2 = $canvasHeight; // End at the bottom of the footer
-            $lineWidth = 10; 
-            $rectangleWidth = 100; // Width of the rectangle to fill
-            $rectangleX = $canvasWidth - $rectangleWidth;
-            // imagefilledrectangle($canvas, $lineX, $lineY1, $lineX + $lineWidth, $lineY2, $borderColor);
-            imagefilledrectangle($canvas, $rectangleX, $canvasHeight - $footerHeight, $canvasWidth, $canvasHeight, $borderColor);
-            for ($i = 0; $i < $lineWidth; $i++) {
-                imageline($canvas, $lineX + $i, $lineY1, $lineX + $i, $lineY2, $borderColor);
-            }
+            // $lineX = $canvasWidth - 100; // 100 pixels from the right
+            // $lineY1 = $canvasHeight - $footerHeight; // Start from the top of the footer
+            // $lineY2 = $canvasHeight; // End at the bottom of the footer
+            // $lineWidth = 10; 
+            // $rectangleWidth = 100; // Width of the rectangle to fill
+            // $rectangleX = $canvasWidth - $rectangleWidth;
+            // // imagefilledrectangle($canvas, $lineX, $lineY1, $lineX + $lineWidth, $lineY2, $borderColor);
+            // imagefilledrectangle($canvas, $rectangleX, $canvasHeight - $footerHeight, $canvasWidth, $canvasHeight, $borderColor);
+            // for ($i = 0; $i < $lineWidth; $i++) {
+            //     imageline($canvas, $lineX + $i, $lineY1, $lineX + $i, $lineY2, $borderColor);
+            // }
 
-            $logoPath = public_path('storage/images/walstar_logo.png');
+            $logoPath = public_path('storage/images/surreta_logo.png');
             // $logoImg = imagecreatefrompng($logoPath); // Adjust if it's a different format
             
             $errorReportingLevel = error_reporting(E_ALL & ~E_WARNING);
@@ -373,7 +381,7 @@ class PostController extends Controller
 
             // Resize logo if needed
             $logoWidth = 90; // Desired logo width
-            $logoHeight = 60; // Desired logo height (adjust as needed)
+            $logoHeight = 100; // Desired logo height (adjust as needed)
             $logoResized = imagecreatetruecolor($logoWidth, $logoHeight);
             $white = imagecolorallocate($logoResized, 255, 255, 255);
             $white_light = imagecolorallocate($logoResized, 223, 236, 255);
@@ -396,23 +404,69 @@ class PostController extends Controller
             // $fontSize = 10; 
             // imagettftext($canvas, $fontSize, 0, $textX, $textY, $white, $fontFile, $categoryName);
         }
+        // $fontFile = public_path('fonts/NotoSans-MediumItalic.ttf');
+        // $categoryName = "KARANJKAR ONLINE & CSC CENTER ✆ 7387017005 | | ✉ karanjkaronline1@gmail.com"; 
+        
+        // $watermarkFontSize = 10; 
+        
+        // $watermarkColor = imagecolorallocatealpha($canvas, 0, 0, 0, 75); 
+        // $backgroundColor = imagecolorallocatealpha($canvas, 255, 255, 255, 50); 
+        
+        // $boundingBox = imagettfbbox($watermarkFontSize, 0, $fontFile, $categoryName);
+        // $watermarkWidth = abs($boundingBox[2] - $boundingBox[0]);
+        // $watermarkHeight = abs($boundingBox[5] - $boundingBox[1]);
+        
+        // $centerX = ($canvasWidth - $watermarkWidth) / 2;
+        // $centerY = ($canvasHeight - $watermarkHeight) / 2 + $watermarkHeight;
+        
+        // imagefilledrectangle($canvas, $centerX - 5, $centerY - $watermarkHeight - 5, 
+        //                      $centerX + $watermarkWidth + 5, $centerY + 5, $backgroundColor);
+        
+        // imagettftext($canvas, $watermarkFontSize, 0, $centerX, $centerY, $watermarkColor, $fontFile, $categoryName);
+
         $fontFile = public_path('fonts/NotoSans-MediumItalic.ttf');
-        $categoryName = "आपला प्रवास, सुखाचा प्रवास."; // Watermark text
-        
-        // Define watermark properties
-        $watermarkFontSize = 40; 
-        
-        // Set watermark color to black
-        $watermarkColor = imagecolorallocatealpha($canvas, 0, 0, 0, 50); // 50 for transparency
-        
-        $boundingBox = imagettfbbox($watermarkFontSize, 0, $fontFile, $categoryName);
-        $watermarkWidth = abs($boundingBox[2] - $boundingBox[0]);
-        $watermarkHeight = abs($boundingBox[5] - $boundingBox[1]);
-        
-        $centerX = ($canvasWidth - $watermarkWidth) / 2;
-        $centerY = ($canvasHeight - $watermarkHeight) / 2 + $watermarkHeight; 
-        
-        imagettftext($canvas, $watermarkFontSize, 0, $centerX, $centerY, $watermarkColor, $fontFile, $categoryName);
+        // $categoryName = "KARANJKAR ONLINE & CSC CENTER";
+        // $contactInfo = "✆ 7387017005 | | ✉ karanjkaronline1@gmail.com"; 
+        $categoryName = "";
+        $contactInfo = ""; 
+
+        $watermarkFontSize = 10; 
+        $watermarkColor = imagecolorallocatealpha($canvas, 0, 0, 0, 0); 
+        $backgroundColor = imagecolorallocatealpha($canvas, 255, 255, 255, 50); 
+
+        // Calculate the bounding box for both lines
+        $boundingBox1 = imagettfbbox($watermarkFontSize, 0, $fontFile, $categoryName);
+        $boundingBox2 = imagettfbbox($watermarkFontSize, 0, $fontFile, $contactInfo);
+
+        $watermarkWidth1 = abs($boundingBox1[2] - $boundingBox1[0]);
+        $watermarkHeight1 = abs($boundingBox1[5] - $boundingBox1[1]);
+        $watermarkWidth2 = abs($boundingBox2[2] - $boundingBox2[0]);
+        $watermarkHeight2 = abs($boundingBox2[5] - $boundingBox2[1]);
+
+        // Calculate the center positions for each line
+        $centerX1 = ($canvasWidth - $watermarkWidth1) / 2;
+        $centerY1 = ($canvasHeight - $watermarkHeight1) / 2;
+
+        $centerX2 = ($canvasWidth - $watermarkWidth2) / 2;
+        $centerY2 = $centerY1 + $watermarkHeight1; // Position second line below the first
+
+        // Create the background rectangle for the first line
+        imagefilledrectangle($canvas, $centerX1 - 5, $centerY1 - $watermarkHeight1 - 5, 
+                            $centerX1 + $watermarkWidth1 + 5, $centerY1 + 5, $backgroundColor);
+
+        // Create the background rectangle for the second line
+        imagefilledrectangle($canvas, $centerX2 - 5, $centerY2 - $watermarkHeight2 - 5, 
+                            $centerX2 + $watermarkWidth2 + 5, $centerY2 + 5, $backgroundColor);
+
+        // Apply the text with a 45-degree angle
+        $angle = 45;
+
+        // Draw the first line
+        imagettftext($canvas, $watermarkFontSize, $angle, $centerX1, $centerY1, $watermarkColor, $fontFile, $categoryName);
+
+        // Draw the second line
+        imagettftext($canvas, $watermarkFontSize, $angle, $centerX2, $centerY2, $watermarkColor, $fontFile, $contactInfo);
+
         ob_start();
         imagepng($canvas);
         $imageData = ob_get_contents();

@@ -15,18 +15,49 @@
     <link href="https://fonts.bunny.net/css?family=Nunito" rel="stylesheet">
 
     <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <!-- Your custom CSS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 </head>
 <body>
     <!-- Header -->
     @include('layouts.header')
+    @if(session('login_success'))
+        <script>
+            Swal.fire({
+                title: 'Success!',
+                text: '{{ session('login_success') }}',
+                icon: 'success',
+                confirmButtonText: 'OK'
+            });
+        </script>
+    @endif
+    @if (session('success'))
+        <script>
+            Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: "{{ session('success') }}",
+                confirmButtonText: 'OK'
+            });
+        </script>
+    @endif
     <div class="custom-home-page">
         <div class="image-section image-crop text-center mb-4">
             <img src="{{ asset('storage/images/social_media.jpg') }}" alt="Promotional Image" class="img-fluid">
             <div class="overlay"></div> <!-- Overlay div -->
-            <a href="{{ route('register') }}" class="btn btn-primary center-button btn-large">Register Now</a>
+            @if (!Auth::check())
+                <a href="{{ route('register') }}" class="btn btn-primary center-button btn-large">Register Now</a>
+            @endif
         </div>
         <!-- Ticket Section -->
         <div class="ticket-section d-none">
@@ -56,6 +87,7 @@
 
         <div class="category-section">
             <div class="container">
+                <h2 class="category-section-header">Categories</h2>
                 <div class="category-container">
                     @foreach ($categories as $category)
                         <div class="parent_category" data-id="{{ $category->id }}" role="button" aria-label="Select category: {{ $category->name }}">
@@ -76,13 +108,13 @@
                     <div class="col-md-3 mb-3">
                         <div class="card shadow-sm border-light rounded">
                             <div class="card-body">
-                                <h5 class="card-title mb-4 text-center">Select Categories</h5>
+                                <h5 class="card-title mb-4 text-center">Select Sub-Categories</h5>
                                 <hr style="border-top: 2px solid #004c72; margin-bottom: 20px;">
                                 <ul class="list-unstyled" id="subcategories-list">
                                     @foreach ($SubCategory as $subcategory)
-                                        <li class="mb-3">
+                                        <li class="mb-3 {{ $loop->first ? 'selected' : '' }}">
                                             <div class="d-flex justify-content-between align-items-center">
-                                                <span class="category-name" data-id="{{ $subcategory->id }}">
+                                                <span class="category-name {{ $loop->first ? 'selected' : '' }}" data-id="{{ $subcategory->id }}">
                                                     {{ $subcategory->sub_category_name }}
                                                 </span>
                                                 @if ($subcategory->isNew)
@@ -112,33 +144,52 @@
                                 </div>
                                 <div class="post-item poster_a d-none">
                                     <div id="poster-content" class="row"></div> <!-- For displaying post images -->
-                                    <div class="post-item empty_a d-none">No content available</div>
+                                    <div class="empty_a">Select sub-category to view posts.</div>
                                 </div>
                                 <div class="post-item one_page d-none">
-                                    <div id="one-page-content"></div> <!-- For displaying one page PDF -->
+                                    <div id="one-page-content">
+                                        <div id="pdf-container" class="container my-5">
+                                            <div id="one-page-content" class="mb-4">
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="post-item two_page d-none">
-                                    <div id="two-page-content"></div> <!-- For displaying two page PDF -->
+                                    <div id="two-page-content">
+                                        <div id="pdf-container" class="container my-5">
+                                            <div id="two-page-content" class="mb-4">
+                                            </div>
+                                        </div>
+                                    </div> 
                                 </div>
                                 <div class="post-item link_a d-none">
                                     <div id="link-content"></div> <!-- For displaying links -->
                                 </div>
                                 <div class="post-item empty_a d-none">No content available</div>
                             </div>
-                            <div id="full-image-display" class="d-none">
-                                <form action="" method="get">
-                                    <button type="submit" class="btn btn-secondary">Back</button>
-                                </form>
-                                <h2 id="full-image-title"></h2>
-                                <img id="full-image" src="" alt="Full Size" >
-                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+        <div class="modal fade" id="fullImageModal" tabindex="-1" role="dialog" aria-labelledby="fullImageModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg"> <!-- or modal-md for medium size -->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="fullImageModalLabel">Downloading Image</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <img id="full-image" src="" alt="full-image class="img-fluid">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-sm"> <!-- or modal-md for medium size -->
+            <div class="modal-dialog modal-lg"> <!-- or modal-md for medium size -->
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="imageModalLabel">Downloading Image</h5>
@@ -155,7 +206,6 @@
             </div>
         </div>
     </div>
-
     <!-- Footer -->
     @include('layouts.footer')
 
@@ -164,41 +214,74 @@
 
     <!-- JavaScript for AJAX -->
     <script>
-
+        function fetchUserDetails() {
+            return fetch('/user-details', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') // Include CSRF token if necessary
+                }
+            })
+            .then(userDetailsResponse => {
+                if (!userDetailsResponse.ok) {
+                    console.error('Failed to fetch user details');
+                    return null; 
+                }
+                return userDetailsResponse.json();
+            })
+            .catch(error => {
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'You need to be logged in to download this post.',
+                    icon: 'warning',
+                    showCancelButton: false,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Go to Login'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = '/login';
+                    }
+                });
+                return null;
+            });
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                const firstCategory = document.querySelector('#subcategories-list .category-name.selected');
+                if (firstCategory) {
+                    firstCategory.click();
+                }
+            }, 10);
+        });
         $(document).ready(function() {
+            
             const filterOptions = document.querySelectorAll('.filter-option');
             const postItems = document.querySelectorAll('.post-item');
 
             filterOptions.forEach(option => {
                 option.addEventListener('click', () => {
-                    // Hide all post items first
                     postItems.forEach(item => {
                         item.classList.add('d-none');
                     });
 
-                    // Remove active class from all options
                     filterOptions.forEach(opt => {
                         opt.classList.remove('active');
                     });
 
-                    // Get the type from the clicked option
                     const type = option.getAttribute('data-type');
 
-                    // Display the selected post item
                     const selectedItem = document.querySelector(`.post-item.${type}`);
                     if (selectedItem) {
                         selectedItem.classList.remove('d-none');
                     } else {
-                        // If no content is available for the selected type
-                        document.querySelector('.post-item.empty_a').classList.remove('d-none');
+                        document.querySelector('.empty_a').classList.add('d-none');
                     }
 
-                    // Add active class to the clicked option
                     option.classList.add('active');
                 });
             });
 
-            // Default to displaying Poster content
             const defaultOption = document.querySelector('.filter-option[data-type="poster_a"]');
             if (defaultOption) {
                 defaultOption.click();
@@ -207,7 +290,7 @@
             // $('.category-name').click(function() {
             $('#subcategories-list').on('click', '.category-name', function() {
                 var categoryId = $(this).data('id');
-
+                document.querySelector('.empty_a').classList.add('d-none');
                 $('.category-name').removeClass('selected');
                 $(this).addClass('selected');
 
@@ -235,35 +318,48 @@
                                         <div class="card">
                                             <img src="{{ asset('storage') }}/${post.post_image}" alt="${post.post_title}" class="card-img-top poster-image" style="width: 100%; height: auto;">
                                             <div class="card-body">
-                                                <h5 class="card-title">${post.post_title}</h5>
                                                 <button type="button" class="btn btn-log btn-primary download-btn" 
                                                     data-image="{{ asset('storage') }}/${post.post_image}" 
                                                     data-header="${headerPath}" 
                                                     data-footer="${footerPath}" 
-                                                    data-post-id="${post.id}">Download Post</button>
+                                                    data-post-id="${post.id}"><i class="bi bi-printer-fill"></i></button>
+                                                    <a href="{{ route('custom.image') }}?id=${post.id}" class="btn btn-log btn-primary" id="openCustomImage">
+                                                        <i class="bi bi-sliders"></i>
+                                                        Create Custom Image
+                                                    </a>
                                             </div>
                                         </div>
                                     </div>
                                 `);
                             }
 
-                            // Display Post PDF
                             if (post.post_pdf) {
                                 $('#one-page-content').append(`
-                                    <div>
-                                        <h5>${post.post_title} (One Page)</h5>
-                                        <iframe src="{{ asset('storage') }}/${post.post_pdf}" style="width:100%; height:500px;" frameborder="0"></iframe>
+                                    <div class="card mb-3">
+                                        <div class="card-body">
+                                            <h5 class="card-title">${post.post_title}</h5>
+                                            <iframe src="{{ asset('storage') }}/${post.post_pdf}" style="width:100%; height:400px;" frameborder="0" class="mb-3"></iframe>
+                                            <button class="btn btn-primary btn-log download-pdf-btn" 
+                                                data-pdf="{{ asset('storage') }}/${post.post_pdf}">
+                                                Download PDF
+                                            </button>
+                                        </div>
                                     </div>
                                 `);
                                 
                                 $('#two-page-content').append(`
-                                    <div>
-                                        <h5>${post.post_title} (Two Page)</h5>
-                                        <iframe src="{{ asset('storage') }}/${post.post_pdf}" style="width:100%; height:500px;" frameborder="0"></iframe>
+                                    <div class="card mb-3">
+                                        <div class="card-body">
+                                            <h5 class="card-title">${post.post_title}</h5>
+                                            <iframe src="{{ asset('storage') }}/${post.post_pdf}" style="width:100%; height:400px;" frameborder="0" class="mb-3"></iframe>
+                                            <button class="btn btn-primary btn-log download-pdf-btn" 
+                                                data-pdf="{{ asset('storage') }}/${post.post_pdf}">
+                                                Download PDF
+                                            </button>
+                                        </div>
                                     </div>
                                 `);
                             }
-
                             // Display Link
                             if (post.link) {
                                 $('#link-content').append(`
@@ -275,11 +371,16 @@
                             }
                         });
 
-                        // Show the default view after loading posts
                         document.querySelector('.filter-option[data-type="poster_a"]').click();
                     },
                     error: function() {
-                        alert('Failed to load posts.');
+                        Swal.fire({
+                            title: 'Error!',
+                            text: 'Failed to load posts.',
+                            icon: 'error',
+                            confirmButtonColor: '#3085d6',
+                            confirmButtonText: 'Okay'
+                        });
                     }
                 });
             });
@@ -287,10 +388,9 @@
                 var imgSrc = $(this).attr('src');
                 var title = $(this).siblings('.card-body').find('.card-title').text();
 
-                $('#posts-content').addClass('d-none');
-                $('.post-item').hide();
                 $('#full-image').attr('src', imgSrc);
-                $('#full-image-display').removeClass('d-none');
+                $('#fullImageModalLabel').text(title);
+                $('#fullImageModal').modal('show'); 
             });
             $(document).on('click', '.download-btn', function(e) {
                 e.preventDefault();
@@ -298,155 +398,279 @@
                 var headerPath = $(this).data('header');
                 var footerPath = $(this).data('footer');
                 var postId = $(this).data('post-id');
-                createAndDownloadImage(imageUrl, headerPath, footerPath, postId);
+                createAndDownloadImage(imageUrl, postId);
             });
         });
 
-        var isLoggedIn = {!! json_encode(auth()->check()) !!};
-        var userId = @json(auth()->check() ? auth()->user()->id : null);
-        function createAndDownloadImage(imageUrl, headerPath, footerPath, postId) {
+        $(document).on('click', '.download-pdf-btn', async function(e) {
+            e.preventDefault();
+            var pdfUrl = $(this).data('pdf');
+
             if (!isLoggedIn) {
-                alert('You need to be logged in to download this post.');
-                window.location.href = '/login'; 
+                    Swal.fire({
+                    title: 'Error!',
+                    text: 'You need to be logged in to download this pdf.',
+                    icon: 'warning',
+                    showCancelButton: false,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Go to Login'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = '/login';
+                    }
+                });
+                return null;
+            }
+
+            const userDetails = await fetchUserDetails();
+            if (!userDetails) {
+                console.error('User details could not be fetched.');
                 return;
             }
 
-            $.ajax({
-                url: '{{ route('check.download.limit') }}',
-                method: 'POST',
-                data: {
-                    user_id: userId,
-                    _token: '{{ csrf_token() }}'
-                },
-                success: function(response) {
-                    if (response.exceededLimit) {
-                        alert('You have reached the download limit for your subscription. Please choose a subscription plan to download more posts.');
-                        window.location.href = response.redirectUrl;
-                        return;
-                    }
+            const userName = userDetails.name;
+            const userMobile = userDetails.mobile;
+            const userEmail = userDetails.email;
 
+            try {
+                await checkDownloadLimit(userId);
+
+                const existingPdfBytes = await fetch(pdfUrl).then(res => res.arrayBuffer());
+
+                const pdfDoc = await PDFLib.PDFDocument.load(existingPdfBytes);
+                const pages = pdfDoc.getPages();
+
+                pages.forEach(page => {
+                    const { width, height } = page.getSize();
+
+                    page.drawText(userName, {
+                        x: width / 2 - 150,
+                        y: height / 2 + 40,
+                        size: 25,
+                        color: PDFLib.rgb(0.5, 0.5, 0.5), 
+                        opacity: 0.5,
+                        rotate: PDFLib.degrees(45),
+                    });
+
+                    page.drawText(`Phone: ${userMobile} | Email: ${userEmail}`, {
+                        x: width / 2 - 150, 
+                        y: height / 2, 
+                        size: 20,
+                        color: PDFLib.rgb(0.5, 0.5, 0.5), 
+                        opacity: 0.5,
+                        rotate: PDFLib.degrees(45),
+                    });
+                });
+
+                const pdfBytes = await pdfDoc.save();
+
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(new Blob([pdfBytes], { type: 'application/pdf' }));
+                link.download = pdfUrl.split('/').pop(); 
+
+                document.body.appendChild(link);
+                link.click();
+
+                document.body.removeChild(link);
+
+                $.ajax({
+                    url: '{{ route('download.record') }}',
+                    method: 'POST',
+                    data: {
+                        user_id: userId,
+                        pdf_url: pdfUrl,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function() {
+                        console.log('Download record saved successfully.');
+                    },
+                    error: function() {
+                        console.error('Failed to save download record.');
+                    }
+                });
+
+            } catch (error) {
+                console.error(error);
+            }
+        });
+
+
+        function decodeHtml(html) {
+            var txt = document.createElement("textarea");
+            txt.innerHTML = html;
+            return txt.value;
+        }
+
+        var isLoggedIn = {!! json_encode(auth()->check()) !!};
+        var userId = @json(auth()->check() ? auth()->user()->id : null);
+        async function createAndDownloadImage(imageUrl, postId) {
+
+            if (!isLoggedIn) {
+                Swal.fire({
+                title: 'Error!',
+                text: 'You need to be logged in to download this post.',
+                icon: 'warning',
+                showCancelButton: false,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Go to Login'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '/login';
+                }
+            });
+            return null;
+            }
+            const userDetails = await fetchUserDetails();
+            if (!userDetails) {
+                console.error('User details could not be fetched.');
+                return;
+            }
+
+            const userName = userDetails.name;
+            const userMobile = userDetails.mobile;
+            const userEmail = userDetails.email;
+            const userAddress = userDetails.address;
+
+
+            try {
+                await checkDownloadLimit(userId); 
+
+                var img = new Image();
+                img.crossOrigin = 'Anonymous';
+                img.src = imageUrl;
+
+                img.onload = function() {
                     var canvas = document.createElement('canvas');
                     var ctx = canvas.getContext('2d');
-                    var img = new Image();
-                    var header = new Image();
-                    var footer = new Image();
 
-                    var headerLoaded = true;
-                    var footerLoaded = true;
+                    canvas.width = img.width;
+                    canvas.height = img.height; 
 
-                    img.crossOrigin = 'Anonymous';
-                    header.crossOrigin = 'Anonymous';
-                    footer.crossOrigin = 'Anonymous';
+                    ctx.drawImage(img, 0, 0);
 
-                    img.src = imageUrl;
+                    ctx.fillStyle = 'black';
+                    ctx.font = '25px Arial';
+                    ctx.textAlign = 'center';
 
-                    img.onload = function() {
-                        console.log('Main image loaded');
-                        var canvasHeight = img.height;
-                        var canvasWidth = img.width;
+                    const footerHeight = 100; 
+                    const footerY = img.height - footerHeight + 20;
 
-                        if (headerLoaded) {
-                            canvasHeight += header.height; // Add header height
-                        }
+                    ctx.fillText(userName, canvas.width / 2, footerY); 
 
-                        if (footerLoaded) {
-                            canvasHeight += footer.height; // Add footer height
-                        }
+                    ctx.font = '16px Arial';
 
-                        // Set canvas dimensions
-                        canvas.width = Math.max(canvasWidth, headerLoaded ? header.width : 0, footerLoaded ? footer.width : 0);
-                        canvas.height = canvasHeight;
+                    const usermobileandemail = '✆' + userMobile + ' | |  ✉ ' + userEmail; 
+                    ctx.fillText(usermobileandemail, canvas.width / 2, footerY + 30); 
 
-                        // Draw header if loaded
-                        if (headerLoaded) {
-                            ctx.drawImage(header, (canvas.width - header.width) / 2, 0); // Center header
-                        }
+                    ctx.fillText(userAddress, canvas.width / 2, footerY + 50); 
 
-                        // Draw main image
-                        ctx.drawImage(img, (canvas.width - img.width) / 2, headerLoaded ? header.height : 0); // Center main image
+                    var imageDataUrl = canvas.toDataURL('image/png');
+                    document.getElementById('downloadedImage').src = imageDataUrl;
 
-                        // Draw footer if loaded
-                        if (footerLoaded) {
-                            ctx.drawImage(footer, (canvas.width - footer.width) / 2, canvas.height - footer.height); // Center footer
-                        }
+                    var imageModal = new bootstrap.Modal(document.getElementById('imageModal'));
+                    imageModal.show();
 
-                        var imageDataUrl = canvas.toDataURL('image/png');
-                        document.getElementById('downloadedImage').src = imageDataUrl;
-
-                        document.getElementById('downloadedImage').src = imageDataUrl;
-
-                        // Set up download button
-                        document.getElementById('downloadButton').onclick = function() {
-                            var link = document.createElement('a');
-                            link.href = imageDataUrl;
-                            link.download = 'post-image.png';
-                            link.click();
-                        };
-
-
-                        var imageModal = new bootstrap.Modal(document.getElementById('imageModal'));
-                        imageModal.show();
-
-                        $.ajax({
-                            url: '{{ route('download.record') }}',
-                            method: 'POST',
-                            data: {
-                                user_id: userId,
-                                post_id: postId,
-                                _token: '{{ csrf_token() }}'
-                            },
-                            success: function(response) {
-                                console.log('Download record saved successfully.');
-                            },
-                            error: function() {
-                                console.error('Failed to save download record.');
-                            }
-                        });
+                    document.getElementById('downloadButton').onclick = function() {
+                        var link = document.createElement('a');
+                        link.href = imageDataUrl;
+                        link.download = 'post-image.png';
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
                     };
 
-                    img.onerror = function() {
-                        console.error('Failed to load main image');
-                    };
+                    $.ajax({
+                        url: '{{ route('download.record') }}',
+                        method: 'POST',
+                        data: {
+                            user_id: userId,
+                            post_id: postId,
+                            _token: '{{ csrf_token() }}'
+                        },
+                        success: function() {
+                            console.log('Download record saved successfully.');
+                        },
+                        error: function() {
+                            console.error('Failed to save download record.');
+                        }
+                    });
+                };
 
-                    if (headerPath) {
-                        header.src = headerPath;
+                img.onerror = function() {
+                    console.error('Failed to load main image');
+                };
+            } catch (error) {
+                console.error(error);
+            }
+        }
 
-                        header.onload = function() {
-                            console.log('Header loaded');
-                            headerLoaded = true;
-
-                            // Adjust canvas height
-                            if (footerLoaded) {
-                                canvas.height += footer.height; 
-                            }
-                        };
-
-                        header.onerror = function() {
-                            console.error('Failed to load header image');
-                        };
+        async function checkDownloadLimit(userId) {
+            return new Promise((resolve, reject) => {
+                $.ajax({
+                    url: '{{ route('check.download.limit') }}',
+                    method: 'POST',
+                    data: {
+                        user_id: userId,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        if (response.exceededLimit) {
+                            Swal.fire({
+                                title: 'Limit Exceeded',
+                                text: 'You have reached the download limit for your subscription. Please choose a subscription plan to download more posts.',
+                                icon: 'warning',
+                                confirmButtonColor: '#3085d6',
+                                confirmButtonText: 'Go to Subscription Plans'
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    window.location.href = response.redirectUrl;
+                                }
+                                reject('Limit exceeded');
+                            });
+                        } else if (response.transactionLimita) {
+                            Swal.fire({
+                                title: 'Payment Pending',
+                                text: 'Your payment is not approved yet. Please wait; we will check and update you.',
+                                icon: 'info',
+                                confirmButtonColor: '#3085d6',
+                                confirmButtonText: 'OK'
+                            }).then(() => {
+                                window.location.href = response.redirectUrl;
+                                reject('Payment not approved');
+                            });
+                        } else if (response.transactionLimitb) {
+                            Swal.fire({
+                                title: 'Subscription Incomplete',
+                                text: 'You have not completed your subscription yet; please make a subscription and use our services.',
+                                icon: 'info',
+                                confirmButtonColor: '#3085d6',
+                                confirmButtonText: 'OK'
+                            }).then(() => {
+                                window.location.href = response.redirectUrl;
+                            });
+                            reject('Subscription incomplete');
+                        } else if (response.subscriptionOver) {
+                            Swal.fire({
+                                title: 'Subscription Expired',
+                                text: 'Your subscription has expired; please make a subscription.',
+                                icon: 'info',
+                                confirmButtonColor: '#3085d6',
+                                confirmButtonText: 'OK'
+                            }).then(() => {
+                                window.location.href = response.redirectUrl;
+                            });
+                            reject('Subscription expired');
+                        } else {
+                            resolve(response); // Resolve with response if all checks pass
+                        }
+                    },
+                    error: function() {
+                        console.error('Failed to check download limit.');
+                        reject('AJAX error');
                     }
-
-                    if (footerPath) {
-                        footer.src = footerPath;
-
-                        footer.onload = function() {
-                            console.log('Footer loaded');
-                            footerLoaded = true;
-
-                            // Adjust canvas height
-                            if (headerLoaded) {
-                                canvas.height += header.height; 
-                            }
-                        };
-
-                        footer.onerror = function() {
-                            console.error('Failed to load footer image');
-                        };
-                    }
-                },
-                error: function() {
-                    console.error('Failed to check download limit.');
-                }
+                });
             });
         }
 
@@ -455,23 +679,21 @@
 
             categoryElements.forEach(category => {
                 category.addEventListener('click', function() {
+                    // alert("abcd"); 
                     const categoryId = this.getAttribute('data-id');
-
-                    // Remove active class from all categories
                     categoryElements.forEach(cat => cat.classList.remove('active'));
-
-                    // Add active class to the clicked category
                     this.classList.add('active');
 
                     fetch(`/subcategories/${categoryId}`)
                         .then(response => response.json())
                         .then(data => {
                             const subcategoriesList = document.getElementById('subcategories-list');
-                            subcategoriesList.innerHTML = ''; // Clear previous subcategories
+                            subcategoriesList.innerHTML = '';
 
-                            data.forEach(subcategory => {
+                            data.forEach((subcategory, index) => {
                                 const li = document.createElement('li');
                                 li.classList.add('mb-3');
+                                const isSelected = index === 0;
                                 li.innerHTML = `
                                     <div class="d-flex justify-content-between align-items-center">
                                         <span class="category-name" data-id="${subcategory.id}">
@@ -483,14 +705,17 @@
                                 `;
                                 subcategoriesList.appendChild(li);
                             });
+                            if (data.length > 0) {
+                                const firstSubcategoryId = data[0].id; 
+                                document.querySelector(`.category-name[data-id="${firstSubcategoryId}"]`).click(); // Simulate click
+                            }
                         });
                 });
 
-                // Keyboard navigation support
-                category.tabIndex = 0; // Make div focusable
+                category.tabIndex = 0; 
                 category.addEventListener('keypress', function(e) {
                     if (e.key === 'Enter' || e.key === ' ') {
-                        this.click(); // Trigger click event on Enter or Space
+                        this.click(); 
                     }
                 });
             });

@@ -7,16 +7,16 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class WelcomeEmailNotification extends Notification
+class TransactionApprovedNotification extends Notification
 {
     use Queueable;
-
+    protected $transaction;
     /**
      * Create a new notification instance.
      */
-    public function __construct()
+    public function __construct($transaction)
     {
-        //
+        $this->transaction = $transaction;
     }
 
     /**
@@ -34,13 +34,18 @@ class WelcomeEmailNotification extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
+        // return (new MailMessage)
+        //             ->line('The introduction to the notification.')
+        //             ->action('Notification Action', url('/'))
+        //             ->line('Thank you for using our application!');
+
         return (new MailMessage)
-            ->subject('Welcome to Our Walstar Social!')
-            ->greeting('Hello, ' . $notifiable->name . '!')
-            ->line('Thank you for registering with us. We are excited to have you on board!')
-            ->action('Visit Dashboard', url('/dashboard'))
-            ->line('Best Regards,')
-            ->line('Walstar Poster');
+        ->subject('Transaction Approved')
+        ->line('Your transaction has been approved successfully.')
+        // ->action('View Transaction', url('/transactions/' . $this->transaction->id))
+        ->action('View Transaction', url('/user-transactions'))
+        ->line('Thank you for using our application!');
+
     }
 
     /**

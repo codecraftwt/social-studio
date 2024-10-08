@@ -42,14 +42,14 @@
                     <label for="password-confirm">Confirm Password</label>
                 </div>
 
-                <div class="input-box">
+                <!-- <div class="input-box">
                     <select id="plan" name="plan" required>
                         <option value="">Subscription Plan</option>
                         <option value="free" {{ old('plan') === 'free' ? 'selected' : '' }}>Free</option>
                         <option value="standard" {{ old('plan') === 'standard' ? 'selected' : '' }}>Standard Plan ($10)</option>
                         <option value="premium" {{ old('plan') === 'premium' ? 'selected' : '' }}>Premium Plan ($20)</option>
                     </select>
-                </div>
+                </div> -->
 
                 <div class="input-box">
                     <span class="icon"><i class='bx bx-home'></i></span>

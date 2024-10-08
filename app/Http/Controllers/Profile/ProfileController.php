@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use App\Models\User;
+
 
 class ProfileController extends Controller
 {
@@ -47,4 +49,13 @@ class ProfileController extends Controller
 
         return redirect()->back()->with('success', 'Profile updated successfully!');
     }
+
+    public function viewProfile()
+    {
+        $userId = Auth::id(); // Get the logged-in user's ID
+        $user = User::findOrFail($userId); // Fetch the user's details
+
+        return view('profile.profile', compact('user'));
+    }
+
 }

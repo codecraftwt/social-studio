@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User; 
 use App\Models\Role;
+use App\Models\TransactionDetail;
 use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
@@ -53,8 +54,9 @@ class UserController extends Controller
 
     public function index()
     {
+        User::where('is_new', 1)->update(['is_new' => 0]);
         $roles = Role::all();
-        $users = User::with('role')->where('role_id', 2)->get();
+        $users = User::with('role')->where('role_id', 2)->orderBy('created_at', 'desc')->get();
         return view('User.index', compact('users', 'roles'));
     }
 
@@ -176,4 +178,34 @@ class UserController extends Controller
         }
     }
 
+    // Notification
+    public function notification()
+    {
+        $newUsers = User::where('is_new', 1)->get(['id', 'name', 'email']); // Fetch new users
+        // return response()->json($newUsers);
+        $unreadTransactionCount = TransactionDetail::where('is_read', 0)->count();
+        return response()->json([
+            'newUsers' => $newUsers,
+            'unreadTransactionCount' => $unreadTransactionCount,
+        ]);
+    }
+
+    public function viewUser($id)
+    {
+        $user = User::find($id);
+        if ($user) {
+            $user->is_new = 0; // Mark as viewed
+            $user->save();
+        }
+
+        return view('user.view', compact('user'));
+    }
+
+    public function getNewUserCount()
+    {
+        $newUserCount = User::where('is_new', 1)->count(); // Count new users
+        $unreadTransactionCount = TransactionDetail::where('is_read', 0)->count();
+        $totlacount = $newUserCount + $unreadTransactionCount;
+        return response()->json(['newUserCount' => $totlacount]);
+    }
 }

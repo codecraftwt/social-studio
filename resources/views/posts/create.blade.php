@@ -92,11 +92,10 @@
                 </div>
             </div>
             <div class="col-md-6">
-                <div class="input-box">
+                <div class="input-box3">
                     <!-- Color picker input -->
+                    <input type="color" id="customColor" name="border_color" value="{{ old('border_color', '#ffffff') }}" class="form-lable" required />
                     <label for="border_color" class="form-label">Select border Color</label>
-                    <input type="color" id="customColor" name="border_color" value="{{ old('border_color', '#ffffff') }}" class="" required />
-
                     @error('border_color')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -106,8 +105,8 @@
 
         <div class="mb-3">
             <div class="input-box">
-                <label for="post_explanation" class="form-label">Post Explanation</label>
                 <textarea class=" @error('post_explanation') is-invalid @enderror" id="post_explanation" name="post_explanation" rows="2" required>{{ old('post_explanation') }}</textarea>
+                <label for="post_explanation">Post Explanation</label>
                 @error('post_explanation')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror

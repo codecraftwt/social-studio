@@ -15,12 +15,19 @@ class TransactionDetail extends Model
         'user_id',
         'transaction_id',
         'subscription_type',
+        'amount',
         'payment_screenshot',
         'payment_date',
         'status', // For approve/reject
+        'is_read',
     ];
 
     protected $casts = [
         'payment_date' => 'datetime',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

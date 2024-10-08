@@ -33,7 +33,7 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css">
     <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
     <!-- Custom CSS -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 
@@ -51,11 +51,13 @@
         @guest
                 @include('layouts.header')
         @endguest
-
+        @if(request()->is('plans') || request()->is('plans/create') || request()->is('plans/scannerForm') || request()->is('user-transactions') || request()->is('custom-image'))
+            @include('layouts.header')
+        @endif
         <div class="d-flex flex-grow-1">
             <!-- Sidebar -->
             @auth
-                @if(auth()->user())
+                @if(auth()->user() && !request()->is('plans') && !request()->is('plans/create') && !request()->is('plans/scannerForm') && !request()->is('user-transactions') && !request()->is('custom-image'))
                     @include('layouts.sidebar')
                 @endif
             @endauth
@@ -63,182 +65,199 @@
             <!-- Main Content -->
             <main class="flex-grow-1 p-3">
             @auth
-               @if(auth()->user())
-               <div class="d-flex justify-content-between align-items-center mb-4">
-               <button class="btn btn-light me-2" id="toggleSidebardesktop">
-                    <i class="bi bi-list"></i>
-                </button>
-                <button class="btn btn-light me-2" id="toggleSidebarmobile" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                    <i class="bi bi-list"></i>
-                </button>
-               <div class="search-field-area d-none me-2">
-                    <div class="search-inner">
-                        <form action="#" method="GET">
-                            <div class="input-group">
-                                <input type="text" class="form-control primary-input input-left-icon" placeholder="Search" id="search" onkeyup="showResult(this.value)">
-                                <button class="btn btn-outline-secondary d-none" type="submit">
-                                    <i class="ti-search"></i>
-                                </button>
-                            </div>
-                        </form>
-                        <div id="livesearch" style="display: none;"></div>
-                    </div>
-                </div>
-                    <!-- <div class="d-flex justify-content-center me-2">
-                        <a href="{{ url('/') }}" class="btn btn-primary">Home</a>
-                    </div> -->
-                    <div class="icons d-flex align-items-center">
-                        <a href="#" class="me-2 ms-2" title="Notifications">
-                            <i class="bi bi-bell" style="font-size: 1.5rem;"></i>
-                        </a>
-                        <a href="#" title="Messages" class="ms-2">
-                            <i class="bi bi-chat" style="font-size: 1.5rem;"></i>
-                        </a>
-                        <div class="dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="bi bi-person-circle" style="font-size: 1.5rem;"></i>
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
-                                <li>
-                                    <span class="dropdown-item">Welcome, {{ Auth::user()->name }}</span>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#editProfileModal">Profile</a>
-                                </li>
-                                <li><a class="dropdown-item" href="#">Settings</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <a class="dropdown-item" href="{{ route('logout') }}"
-                                    onclick="event.preventDefault();
-                                                document.getElementById('logout-form').submit();">
-                                        <i class="bi bi-box-arrow-right"></i> {{ __('Logout') }}
-                                    </a>
-                                    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
-                                        @csrf
-                                    </form>
-                                </li>
-                            </ul>
+               @if(auth()->user() && !request()->is('plans') && !request()->is('plans/scannerForm') && !request()->is('plans/create') && !request()->is('user-transactions') && !request()->is('custom-image'))
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <button class="btn btn-light me-2" id="toggleSidebardesktop">
+                            <i class="bi bi-list"></i>
+                        </button>
+                        <button class="btn btn-light me-2" id="toggleSidebarmobile" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                            <i class="bi bi-list"></i>
+                        </button>
+                        <div class="search-field-area d-none me-2">
+                            <div class="search-inner">
+                                <form action="#" method="GET">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control primary-input input-left-icon" placeholder="Search" id="search" onkeyup="showResult(this.value)">
+                                        <button class="btn btn-outline-secondary d-none" type="submit">
+                                            <i class="ti-search"></i>
+                                        </button>
+                                    </div>
+                                </form>
+                            <div id="livesearch" style="display: none;"></div>
                         </div>
                     </div>
-                </div>
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav flex-column">
-                        <!-- Main Menu for Posts -->
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle {{ request()->routeIs('posts.*') ? 'active' : '' }}" href="#" id="postsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="bi bi-tags"></i> Posts
-                            </a>
-                            <ul class="dropdown-menu" aria-labelledby="postsDropdown">
-                                <li>
-                                    <a class="dropdown-item {{ request()->routeIs('posts.create') ? 'active' : '' }}" href="{{ route('posts.create') }}">
-                                        <i class="bi bi-plus-circle"></i> Add Post
+                        <!-- <div class="d-flex justify-content-center me-2">
+                            <a href="{{ url('/') }}" class="btn btn-primary">Home</a>
+                        </div> -->
+                        <div class="icons d-flex align-items-center">
+                            <!-- <a href="#" class="me-2 ms-2" title="Notifications">
+                                <i class="bi bi-bell" style="font-size: 1.5rem;"></i>
+                            </a>-->
+                            @if(auth()->user() && auth()->user()->isAdmin())
+                                <div class="dropdown">
+                                    <a href="#" title="Messages" class="ms-2 dropdown-toggle" id="messageDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-chat" style="font-size: 2.5rem;"></i>
+                                        <span id="new-message-count" class="badge bg-danger position-absolute top-0 start-80 translate-middle rounded-pill" style="margin-top: 10px;"></span>
                                     </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item {{ request()->routeIs('posts.index') ? 'active' : '' }}" href="{{ route('posts.index') }}">
-                                        <i class="bi bi-eye"></i> View Posts
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                        <!-- Additional Nav Items -->
-                        <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('users.index') ? 'active' : '' }}" href="{{ route('users.index') }}">
-                                <i class="bi bi-person"></i> Users
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('settings') ? 'active' : '' }}" href="">
-                                <i class="bi bi-gear"></i> Settings
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-                @if (session('success'))
-                    <div class="alert alert-success">{{ session('success') }}</div>
-                @endif
-                <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="editProfileModalLabel">Edit Profile</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="messageDropdown" id="message-list">
+                                        <li><a class="dropdown-item" href="#">No new messages</a></li>
+                                    </ul>
+                                </div>
+                            @endif
+                            <div class="dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" role="button" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <!-- <i class="bi bi-person-circle" style="font-size: 1.5rem;"></i> -->
+                                    @if (Auth::user()->profile_pic) <!-- Check if the user has a profile picture -->
+                                        <img src="{{ Storage::url(Auth::user()->profile_pic) }}" alt="Profile Picture" class="rounded-circle" style="width: 40px; height: 40px;">
+                                    @else
+                                        <i class="bi bi-person-circle" style="font-size: 1.5rem;"></i></i> <!-- Fallback icon -->
+                                    @endif
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
+                                    <li>
+                                        <span class="dropdown-item">Welcome, {{ Auth::user()->name }}</span>
+                                    </li>
+                                    <li>
+                                        <!-- <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#editProfileModal">Profile</a> -->
+                                        <a class="dropdown-item" href="{{ route('profile.profile') }}"  data-bs-target="">Profile</a>
+                                    </li>
+                                    <!-- <li><a class="dropdown-item" href="{{ route('profile.profile') }}">Settings</a></li> -->
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('logout') }}"
+                                        onclick="event.preventDefault();
+                                                    document.getElementById('logout-form').submit();">
+                                            <i class="bi bi-box-arrow-right"></i> {{ __('Logout') }}
+                                        </a>
+                                        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                                            @csrf
+                                        </form>
+                                    </li>
+                                </ul>
                             </div>
-                            <form id="editProfileForm" action="{{ route('profile.update', Auth::user()->id) }}" method="POST" enctype="multipart/form-data">
-                                @csrf
-                                @method('PUT')
-                                <div class="modal-body">
-                                    <!-- Display Profile Picture -->
-                                    <div class="text-center mb-3">
-                                        @if(Auth::user()->profile_pic)
-                                            <img src="{{ asset('storage/' . Auth::user()->profile_pic) }}" alt="Profile Picture" class="img-fluid" style="width: 150px; height: 150px; object-fit: cover; border-radius: 50%;">
-                                        @else
-                                            <img src="{{ asset('default_profile_pic.png') }}" alt="Default Profile Picture" class="img-fluid" style="width: 150px; height: 150px; object-fit: cover; border-radius: 50%;">
-                                        @endif
-                                    </div>
-
-                                    <div class="input-box">
-                                        <span class="icon"><i class='bx bx-user'></i></span>
-                                        <input type="text" name="name" value="{{ Auth::user()->name }}" required autocomplete="name" class="@error('name') is-invalid @enderror">
-                                        <label>Name</label>
-                                        @error('name')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-
-                                    <div class="input-box">
-                                        <span class="icon"><i class='bx bx-envelope'></i></span>
-                                        <input type="email" name="email" value="{{ Auth::user()->email }}" required autocomplete="email" class="@error('email') is-invalid @enderror">
-                                        <label>Email</label>
-                                        @error('email')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-
-                                    <div class="input-box">
-                                        <span class="icon"><i class='bx bx-pin'></i></span>
-                                        <input type="text" name="postal_code" value="{{ Auth::user()->postal_code }}" required autocomplete="postal_code" class="@error('postal_code') is-invalid @enderror">
-                                        <label>Postal Code</label>
-                                        @error('postal_code')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-
-                                    <div class="input-box">
-                                        <span class="icon"><i class='bx bx-home'></i></span>
-                                        <input type="text" name="address" value="{{ Auth::user()->address }}" required autocomplete="address" class="@error('address') is-invalid @enderror">
-                                        <label>Address</label>
-                                        @error('address')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-
-                                    <div class="input-box">
-                                        <span class="icon"><i class='bx bx-phone'></i></span>
-                                        <input type="text" name="mobile" value="{{ Auth::user()->mobile }}" required autocomplete="mobile" class="@error('mobile') is-invalid @enderror">
-                                        <label>Mobile</label>
-                                        @error('mobile')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-
-                                    <div class="input-box">
-                                        <span class="icon"><i class='bx bx-image'></i></span>
-                                        <input type="file" name="profile_pic" accept="image/*" class="@error('profile_pic') is-invalid @enderror">
-                                        <label>Profile Picture</label>
-                                        @error('profile_pic')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                    <button type="submit" class="btn btn-log">Save changes</button>
-                                </div>
-                            </form>
                         </div>
                     </div>
-                </div>
+                    <div class="collapse navbar-collapse" id="navbarNav">
+                        <ul class="navbar-nav flex-column">
+                            <!-- Main Menu for Posts -->
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle {{ request()->routeIs('posts.*') ? 'active' : '' }}" href="#" id="postsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-tags"></i> Posts
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="postsDropdown">
+                                    <li>
+                                        <a class="dropdown-item {{ request()->routeIs('posts.create') ? 'active' : '' }}" href="{{ route('posts.create') }}">
+                                            <i class="bi bi-plus-circle"></i> Add Post
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item {{ request()->routeIs('posts.index') ? 'active' : '' }}" href="{{ route('posts.index') }}">
+                                            <i class="bi bi-eye"></i> View Posts
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <!-- Additional Nav Items -->
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('users.index') ? 'active' : '' }}" href="{{ route('users.index') }}">
+                                    <i class="bi bi-person"></i> Users
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('profile.profile') ? 'active' : '' }}" href="{{ route('profile.profile') }}">
+                                    <i class="bi bi-gear"></i> Settings
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    @if (session('success'))
+                        <div class="alert alert-success">{{ session('success') }}</div>
+                    @endif
+                    @if (session('error'))
+                        <div class="alert alert-danger">{{ session('error') }}</div>
+                    @endif
+                    <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="editProfileModalLabel">Edit Profile</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <form id="editProfileForm" action="{{ route('profile.update', Auth::user()->id) }}" method="POST" enctype="multipart/form-data">
+                                    @csrf
+                                    @method('PUT')
+                                    <div class="modal-body">
+                                        <!-- Display Profile Picture -->
+                                        <div class="text-center mb-3">
+                                            @if(Auth::user()->profile_pic)
+                                                <img src="{{ asset('storage/' . Auth::user()->profile_pic) }}" alt="Profile Picture" class="img-fluid" style="width: 150px; height: 150px; object-fit: cover; border-radius: 50%;">
+                                            @else
+                                                <img src="{{ asset('default_profile_pic.png') }}" alt="Default Profile Picture" class="img-fluid" style="width: 150px; height: 150px; object-fit: cover; border-radius: 50%;">
+                                            @endif
+                                        </div>
+
+                                        <div class="input-box">
+                                            <span class="icon"><i class='bx bx-user'></i></span>
+                                            <input type="text" name="name" value="{{ Auth::user()->name }}" required autocomplete="name" class="@error('name') is-invalid @enderror">
+                                            <label>Name</label>
+                                            @error('name')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+
+                                        <div class="input-box">
+                                            <span class="icon"><i class='bx bx-envelope'></i></span>
+                                            <input type="email" name="email" value="{{ Auth::user()->email }}" required autocomplete="email" class="@error('email') is-invalid @enderror">
+                                            <label>Email</label>
+                                            @error('email')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+
+                                        <div class="input-box">
+                                            <span class="icon"><i class='bx bx-pin'></i></span>
+                                            <input type="text" name="postal_code" value="{{ Auth::user()->postal_code }}" required autocomplete="postal_code" class="@error('postal_code') is-invalid @enderror">
+                                            <label>Postal Code</label>
+                                            @error('postal_code')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+
+                                        <div class="input-box">
+                                            <span class="icon"><i class='bx bx-home'></i></span>
+                                            <input type="text" name="address" value="{{ Auth::user()->address }}" required autocomplete="address" class="@error('address') is-invalid @enderror">
+                                            <label>Address</label>
+                                            @error('address')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+
+                                        <div class="input-box">
+                                            <span class="icon"><i class='bx bx-phone'></i></span>
+                                            <input type="text" name="mobile" value="{{ Auth::user()->mobile }}" required autocomplete="mobile" class="@error('mobile') is-invalid @enderror">
+                                            <label>Mobile</label>
+                                            @error('mobile')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+
+                                        <div class="input-box">
+                                            <span class="icon"><i class='bx bx-image'></i></span>
+                                            <input type="file" name="profile_pic" accept="image/*" class="@error('profile_pic') is-invalid @enderror">
+                                            <label>Profile Picture</label>
+                                            @error('profile_pic')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        <button type="submit" class="btn btn-log">Save changes</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                 @endif
                @endauth
                 <div class="content-div mt-5">
@@ -248,8 +267,71 @@
         </div>
 
         <!-- Footer -->
-        @include('layouts.footer')
+        @if (Request::url() == url('/'))
+            @include('layouts.footer')
+        @endif
     </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        function fetchNewUserCount() {
+            fetch('/api/new-user-count')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('new-message-count').innerText = data.newUserCount;
+                })
+                .catch(error => console.error('Error fetching new user count:', error));
+        }
+
+        fetchNewUserCount();
+        setInterval(fetchNewUserCount, 60000); // Refresh every 60 seconds
+
+        document.getElementById('messageDropdown').addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const messageList = document.getElementById('message-list');
+            
+            // Clear existing items and show loading
+            messageList.innerHTML = '<li><a class="dropdown-item" href="#">Loading...</a></li>';
+
+            // Fetch new users
+            fetch('/api/notification') // Ensure the endpoint is correct
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok: ' + response.statusText);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Clear loading message
+                    messageList.innerHTML = '';
+
+                    if (data.newUsers.length > 0) {
+                        if (data.newUsers.length > 3) {
+                            const countMessage = `<li><a class="dropdown-item" href="{{ url('user/lists') }}">${data.newUsers.length} new users registered</a></li>`;
+                            messageList.innerHTML += countMessage;
+                        } else {
+                            data.newUsers.forEach(user => {
+                                const messageItem = document.createElement('li');
+                                messageItem.innerHTML = `<a class="dropdown-item" href="{{ url('user/lists') }}">New user registered: <strong>${user.name}</strong></a>`;
+                                messageList.appendChild(messageItem);
+                            });
+                        }
+                    }
+                    if(data.unreadTransactionCount > 0){
+                        const transactionMessage = `<li><a class="dropdown-item" href="{{ url('transactions') }}">You have ${data.unreadTransactionCount} new subscription(s).</a></li>`;
+                        messageList.innerHTML += transactionMessage;
+                    }
+                    if (data.newUsers.length == 0 && data.unreadTransactionCount == 0) {
+                        messageList.innerHTML = '<li><a class="dropdown-item" href="#">0 Notification</a></li>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching notifications:', error);
+                    messageList.innerHTML = '<li><a class="dropdown-item" href="#">Error loading messages</a></li>';
+                });
+        });
+    });
+</script>
 
 </body>
 

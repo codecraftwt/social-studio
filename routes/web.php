@@ -13,6 +13,10 @@ use App\Http\Controllers\Profile\ProfileController;
 use App\Http\Controllers\Category\SubCategoryController;
 use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\Transaction\TransactionController;
+use App\Http\Controllers\Plans\PlanController;
+use App\Http\Controllers\Manage_Account\AccountPaymentController;
+use App\Http\Controllers\customImage\CustomImageController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -30,11 +34,11 @@ Route::get('/', function () {
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Auth::routes();
 
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'dashboard'])->name('home');
+Route::get('/dashboard', [App\Http\Controllers\HomeController::class, 'dashboard'])->name('dashboard');
 Route::get('/subcategories/{category}', [App\Http\Controllers\HomeController::class, 'getSubCategories']);
 Route::get('/posts/by-category', [HomeController::class, 'getPostsByCategory'])->name('posts.byCategory');
-Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
-Route::resource('posts', PostController::class);
+// Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
+// Route::resource('posts', PostController::class);
 // Route::resource('categories', CategoryController::class);
 // Route::put('categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
 // Route::post('/categories/bulkDelete', [CategoryController::class, 'bulkDelete'])->name('categories.bulkDelete');
@@ -61,6 +65,7 @@ Route::group(['middleware' => 'admin'], function () {
     Route::post('/transactions/{id}/reject', [TransactionController::class, 'reject'])->name('transactions.reject'); 
     Route::delete('/transactions/{id}', [TransactionController::class, 'destroy'])->name('transactions.destroy'); 
     Route::post('/transactions/bulk-approve', [TransactionController::class, 'bulkApprove'])->name('transactions.bulkApprove');
+    Route::post('/transactions/bulkDeactivate', [TransactionController::class, 'bulkDeactivate'])->name('transactions.bulkDeactivate');
     Route::post('/transactions/bulk-delete', [TransactionController::class, 'bulkDelete'])->name('transactions.bulkDelete');
     Route::post('categories/{id}/toggle-status', [CategoryController::class, 'toggleStatus'])->name('categories.toggleStatus');
     Route::post('/categories/bulk-toggle-status', [CategoryController::class, 'bulkToggleStatus'])->name('categories.bulkToggleStatus');
@@ -71,6 +76,15 @@ Route::group(['middleware' => 'admin'], function () {
     Route::post('/posts/bulk-toggle-status', [PostController::class, 'bulkToggleStatus'])->name('posts.bulkToggleStatus');
     Route::get('/posts/create', [PostController::class, 'create'])->name('posts.create');
     Route::delete('/posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
+    Route::get('/account/payments/create', [AccountPaymentController::class, 'create'])->name('payments.create');
+    Route::post('/accounts/store', [AccountPaymentController::class, 'storeAccount'])->name('accounts.store');
+    Route::post('/account/payments', [AccountPaymentController::class, 'storePayment'])->name('payments.store');
+    Route::patch('accounts/{id}/toggle-status', [AccountPaymentController::class, 'toggleAccountStatus'])->name('accounts.toggleStatus');
+    Route::patch('payments/{id}/toggle-status', [AccountPaymentController::class, 'toggleScannerStatus'])->name('payments.toggleStatus');
+    Route::get('/api/notification', [UserController::class, 'notification'])->name('notification');
+    Route::get('/api/new-user-count', [UserController::class, 'getNewUserCount']);
+    Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
+    Route::resource('posts', PostController::class);
     // Route::get('/posts/by-category', [HomeController::class, 'getPostsByCategory'])->name('posts.byCategory');
     // Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
     // Route::resource('posts', PostController::class);
@@ -87,12 +101,19 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/header/create', [HeaderController::class, 'create'])->name('header.create');
     Route::post('/header/save', [HeaderController::class, 'save'])->name('header.save');
     Route::post('/header/saveFooter', [HeaderController::class, 'saveFooter'])->name('header.saveFooter');
-
+    Route::get('/plans', [PlanController::class, 'showPlans'])->name('plans');
+    Route::get('/plans/create', [PlanController::class, 'uploadForm'])->name('plans');
+    Route::get('/plans/scannerForm', [PlanController::class, 'scannerForm'])->name('plans.scannerForm');
+    Route::post('/plans/upload-payment', [PlanController::class, 'uploadPayment'])->name('upload.payment');
+    Route::get('/user-details', [DownloadRecordController::class, 'getUserDetails'])->middleware('auth');
+    Route::get('/user-transactions', [TransactionController::class, 'usertransactions'])->name('usertransactions'); 
+    Route::get('/custom-image', [CustomImageController::class, 'index'])->middleware('auth')->name('custom.image');
 });
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
+    Route::get('/profile/profile', [ProfileController::class, 'viewProfile'])->name('profile.profile');
 });
 
 Route::post('/download-record', [DownloadRecordController::class, 'store'])->name('download.record');

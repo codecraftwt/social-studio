@@ -29,11 +29,13 @@
                     <td>{{ $subcategory->sub_category_name }}</td>
                     <td>{{ $subcategory->category->name }}</td>
                     <td>
-                        {{ $subcategory->status == 1 ? 'Active' : 'Inactive' }}
-                        <button class="btn btn-sm {{ $subcategory->status == 1 ? 'btn-warning' : 'btn-success' }} toggle-status" 
-                                data-id="{{ $subcategory->id }}">
-                            {{ $subcategory->status == 1 ? 'Deactivate' : 'Activate' }}
-                        </button>
+                        <label class="switch post-switch">
+                            <input type="checkbox" class="toggle-status" 
+                                data-id="{{ $subcategory->id }}" 
+                                {{ $subcategory->status == 1 ? 'checked' : '' }} 
+                                onchange="toggleStatus(this)">
+                            <span class="slider round"></span>
+                        </label>
                     </td>
                     <td>
                         <button type="button" class="btn btn-primary btn-log btn-sm" data-bs-toggle="modal" data-bs-target="#editSubcategoryModal" data-id="{{ $subcategory->id }}" data-name="{{ $subcategory->sub_category_name }}" data-category-id="{{ $subcategory->category_id }}">Edit</button>
@@ -99,26 +101,51 @@ $(document).ready(function() {
         document.querySelectorAll('.delete-subcategory-btn').forEach(button => {
             button.addEventListener('click', function() {
                 const subcategoryId = this.getAttribute('data-id');
-                if (confirm('Are you sure you want to delete this subcategory?')) {
-                    fetch(`/subcategories/${subcategoryId}`, {
-                        method: 'DELETE',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            location.reload(); // Reload the page to reflect the changes
-                        } else {
-                            alert('An error occurred while deleting the subcategory.');
-                        }
-                    })
-                    .catch(error => {
-                        alert('An error occurred: ' + error.message);
-                    });
-                }
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: 'Do you really want to delete this subcategory?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Yes, delete it!',
+                    cancelButtonText: 'No, cancel!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        fetch(`/subcategories/${subcategoryId}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                location.reload(); // Reload the page to reflect the changes
+                            } else {
+                                Swal.fire({
+                                    title: 'Error!',
+                                    text: 'An error occurred while deleting the subcategory.',
+                                    icon: 'error',
+                                    confirmButtonColor: '#3085d6',
+                                    confirmButtonText: 'OK'
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            Swal.fire({
+                                title: 'Error!',
+                                text: 'An error occurred: ' + error.message,
+                                icon: 'error',
+                                confirmButtonColor: '#3085d6',
+                                confirmButtonText: 'OK'
+                            });
+                        });
+                    } else {
+                        console.log('Deletion canceled');
+                    }
+                });
             });
         });
 
@@ -136,31 +163,73 @@ $(document).ready(function() {
             modalForm.querySelector('#edit-category').value = categoryId; // Set the category field value
         });
 
-        $('.toggle-status').on('click', function() {
-        var subCategoryId = $(this).data('id');
-        var button = $(this);
+        // $('.toggle-status').on('click', function() {
+        //     var subCategoryId = $(this).data('id');
+        //     var button = $(this);
 
-        $.ajax({
-            url: '/subcategories/' + subCategoryId + '/toggle-status',
-            type: 'POST',
-            data: {
-                _token: '{{ csrf_token() }}'
-            },
-            success: function(response) {
-                // Toggle button appearance
-                if (response.status == 1) {
-                    button.removeClass('btn-success').addClass('btn-warning').text('Deactivate');
-                    button.closest('td').contents().first().replaceWith('Active');
-                } else {
-                    button.removeClass('btn-warning').addClass('btn-success').text('Activate');
-                    button.closest('td').contents().first().replaceWith('Inactive');
+        //     $.ajax({
+        //         url: '/subcategories/' + subCategoryId + '/toggle-status',
+        //         type: 'POST',
+        //         data: {
+        //             _token: '{{ csrf_token() }}'
+        //         },
+        //         success: function(response) {
+        //             // Toggle button appearance
+        //             if (response.status == 1) {
+        //                 button.removeClass('btn-success').addClass('btn-warning').text('Deactivate');
+        //                 button.closest('td').contents().first().replaceWith('Active');
+        //             } else {
+        //                 button.removeClass('btn-warning').addClass('btn-success').text('Activate');
+        //                 button.closest('td').contents().first().replaceWith('Inactive');
+        //             }
+        //         },
+        //         // error: function(xhr) {
+        //         //     .catch(xhr => {
+        //         //         Swal.fire({
+        //         //             title: 'Error!',
+        //         //             text: 'An error occurred: ' + xhr.responseText,
+        //         //             icon: 'error',
+        //         //             confirmButtonColor: '#3085d6',
+        //         //             confirmButtonText: 'OK'
+        //         //         });
+        //         //     });
+        //         // }
+        //     });
+        // });
+
+        window.toggleStatus = function(checkbox) {
+            var subCategoryId = $(checkbox).data('id');
+            var status = checkbox.checked ? 1 : 0;
+
+            $.ajax({
+                url: '/subcategories/' + subCategoryId + '/toggle-status',
+                type: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    status: status
+                },
+                success: function(response) {
+                    // Handle response if needed
+                    Swal.fire({
+                        title: 'Success!',
+                        text: 'Status updated successfully.',
+                        icon: 'success',
+                        confirmButtonText: 'OK'
+                    });
+                },
+                error: function(xhr) {
+                    // If there's an error, revert the checkbox state
+                    checkbox.checked = !checkbox.checked; // Revert the checkbox state
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'Failed to update status.',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
                 }
-            },
-            error: function(xhr) {
-                alert('An error occurred: ' + xhr.responseText);
-            }
-        });
-    });
+            });
+        };
+
 
     $('#selectAll').on('change', function() {
         $('.sub-category-checkbox').prop('checked', this.checked);
@@ -172,8 +241,13 @@ $(document).ready(function() {
             .map(checkbox => checkbox.value);
         
         if (selectedSubCategories.length === 0) {
-            alert('Please select at least one sub-category to toggle.');
-            return;
+            Swal.fire({
+                title: 'Warning!',
+                text: 'Please select at least one sub-category to toggle.',
+                icon: 'warning',
+                confirmButtonColor: '#3085d6',
+                confirmButtonText: 'OK'
+            });
         }
 
         var status = $(this).data('status');
@@ -190,12 +264,23 @@ $(document).ready(function() {
                 if (response.success) {
                     location.reload(); // Reload the page to reflect changes
                 } else {
-                    alert('Failed to update sub-categories status.');
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'Failed to update sub-categories status.',
+                        icon: 'error',
+                        confirmButtonColor: '#d33',
+                        confirmButtonText: 'OK'
+                    });
                 }
-            },
-            error: function(xhr) {
-                alert('An error occurred: ' + xhr.responseJSON.message);
-            }
+                // error: function(xhr) {
+                //     Swal.fire({
+                //         title: 'Error!',
+                //         text: xhr.responseJSON.message || 'An error occurred. Please try again.',
+                //         icon: 'error',
+                //         confirmButtonColor: '#d33',
+                //         confirmButtonText: 'OK'
+                //     });
+                }
         });
     });
 
@@ -204,30 +289,63 @@ $(document).ready(function() {
             .map(checkbox => checkbox.value);
 
         if (selectedSubCategories.length === 0) {
-            alert('Please select at least one sub-category to delete.');
+            Swal.fire({
+                title: 'Warning!',
+                text: 'Please select at least one sub-category to delete.',
+                icon: 'warning',
+                confirmButtonColor: '#3085d6',
+                confirmButtonText: 'OK'
+            });
             return;
         }
 
-        if (confirm('Are you sure you want to delete the selected sub-categories?')) {
-            $.ajax({
-                url: '{{ route("subcategories.bulkDelete") }}',
-                type: 'POST',
-                data: {
-                    sub_category_ids: selectedSubCategories,
-                    _token: '{{ csrf_token() }}'
-                },
-                success: function(response) {
-                    if (response.success) {
-                        location.reload(); // Reload the page to reflect changes
-                    } else {
-                        alert('Failed to delete sub-categories.');
+        // Use SweetAlert for confirmation
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'Do you really want to delete the selected sub-categories?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete them!',
+            cancelButtonText: 'No, cancel!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '{{ route("subcategories.bulkDelete") }}',
+                    type: 'POST',
+                    data: {
+                        sub_category_ids: selectedSubCategories,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            location.reload(); // Reload the page to reflect changes
+                        } else {
+                            Swal.fire({
+                                title: 'Error!',
+                                text: 'Failed to delete sub-categories.',
+                                icon: 'error',
+                                confirmButtonColor: '#d33',
+                                confirmButtonText: 'Try Again'
+                            });
+                        }
+                    },
+                    error: function(xhr) {
+                        Swal.fire({
+                            title: 'Error!',
+                            text: 'An error occurred: ' + (xhr.responseJSON.message || 'Please try again later.'),
+                            icon: 'error',
+                            confirmButtonColor: '#d33',
+                            confirmButtonText: 'Close'
+                        });
                     }
-                },
-                error: function(xhr) {
-                    alert('An error occurred: ' + xhr.responseJSON.message);
-                }
-            });
-        }
+                });
+            } else {
+                console.log('Deletion canceled');
+            }
+        });
+
     });
 });
 </script>
