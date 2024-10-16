@@ -88,7 +88,8 @@
         const headerFontSize = 34;
         const headerY = 50;
 
-        const watermarkText = "सर्वांत सोपे आणि जलद ऑनलाइन फॉर्म, ऑनलाइन फॉर्म सेंटरसाठी सुरक्षितता आणि सोपेपणा";
+        // const watermarkText = "सर्वांत सोपे आणि जलद ऑनलाइन फॉर्म, ऑनलाइन फॉर्म सेंटरसाठी सुरक्षितता आणि सोपेपणा";
+        const watermarkText = `{!! $user->name !!} ✆ {!! $user->mobile !!} ✉ {!! $user->email !!}`;
         const watermarkFontSize = 20;
         let watermarkY = canvas.height / 2;
 
@@ -186,10 +187,12 @@
                 ctx.translate(canvas.width / 2, watermarkY);
                 ctx.rotate(watermarkRotation * Math.PI / 180);
 
-                ctx.fillStyle = '#daa8bd';
+                // ctx.fillStyle = '#daa8bd';
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
                 ctx.fillRect(-canvas.width / 2, -watermarkFontSize / 2 - 12, canvas.width, watermarkFontSize + 3);
 
-                ctx.fillStyle = `rgba(0, 0, 0, ${watermarkOpacity})`;
+                // ctx.fillStyle = `rgba(0, 0, 0, ${watermarkOpacity})`;
+                ctx.fillStyle = `rgba(255, 255, 255, ${watermarkOpacity})`;
                 ctx.font = `${watermarkFontSize}px Arial`;
                 ctx.textAlign = 'center';
                 ctx.fillText(watermarkText, 0, 0);

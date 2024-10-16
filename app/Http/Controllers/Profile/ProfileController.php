@@ -24,6 +24,7 @@ class ProfileController extends Controller
             'email' => 'required|string|email|max:255',
             'address' => 'nullable|string|max:255',
             'mobile' => 'nullable|string|max:15',
+            'current_location' => 'nullable|string',
             // Add validation for profile picture if necessary
         ]);
 
@@ -32,7 +33,7 @@ class ProfileController extends Controller
         $user->email = $request->email;
         $user->address = $request->address;
         $user->mobile = $request->mobile;
-
+        $user->current_location = $request->current_location;
         // Handle profile picture upload if applicable
         if ($request->hasFile('profile_pic')) {
             // Delete the existing profile picture if it exists

@@ -263,7 +263,7 @@
             var link = button.getAttribute('data-link');
             var categoryId = button.getAttribute('data-category');
             var imageUrl = button.getAttribute('data-image');
-
+            var sub_category_ids= button.getAttribute('data-sub_category');
             var modalForm = document.getElementById('editPostForm');
             modalForm.action = '/posts/' + id;
 
@@ -304,7 +304,7 @@
                     var option = document.createElement('option');
                     option.value = sub_category.id;
                     option.textContent = sub_category.sub_category_name;
-                    if (sub_category.id == sub_category.category_id) { // Use the correct variable for the selected sub-category ID
+                    if (sub_category.id == sub_category_ids) { // Use the correct variable for the selected sub-category ID
                         option.selected = true;
                     }
                     sub_categorySelect.appendChild(option);

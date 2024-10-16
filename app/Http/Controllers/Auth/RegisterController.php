@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\Subscription;
 use Stripe\Stripe;
 use App\Notifications\WelcomeEmailNotification;
+use App\Notifications\NewUserRegistrationMail;
 use Stripe\Checkout\Session as StripeSession;
 
 class RegisterController extends Controller
@@ -89,33 +90,16 @@ class RegisterController extends Controller
             'mobile' => $data['mobile'],
             'profile_pic' => $profilePicPath,
         ]);
-        $user->notify(new WelcomeEmailNotification());
-        // $expiryDate = null;
-        // if ($plan === 'standard') {
-        //     // $expiryDate = now()->addMonth();
-        //     return redirect()->route('create-checkout-session', ['plan' => $plan]);
-        // } elseif ($plan === 'premium') {
-        //     // $expiryDate = now()->addMonth();
-        //     return redirect()->route('create-checkout-session', ['plan' => $plan]);
-        // }
-    
-        // // Create the subscription record
-        // if ($plan == 'free') { // Assuming free plan does not require a subscription record
-        //     Subscription::create([
-        //         'user_id' => $user->id,
-        //         'subscription_type' => $plan,
-        //         'download_limit' => '2',
-        //     ]);
-        // }
-      
-        // if ($plan !== 'free') {
-        //     return redirect()->route('create-checkout-session', ['plan' => $plan]);
-        // }
+        // $user->notify(new WelcomeEmailNotification());
+        $admin = User::where('role_id', 1)->first();
+        if ($admin) {
+            // Send welcome email to the user
+            $user->notify(new WelcomeEmailNotification($admin->email, $user->name));
+        
+            // Send notification to the admin using the notification
+            $admin->notify(new NewUserRegistrationMail($admin->email, $user->name));
+        }
         session()->flash('success', 'Register successful! Welcome , ' . $user->name . '!');
         return $user;
-        // session()->flash('success', 'Registration successful! Welcome!');
-
-        // // Redirect the user
-        // return redirect($this->redirectTo);
     }
 }

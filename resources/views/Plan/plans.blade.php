@@ -10,6 +10,25 @@
     </div>
 
     <div class="plan-cards d-flex flex-wrap justify-content-center">
+
+        <div class="card m-2">
+            <div class="header">
+                <h2 class="mb-5">Free Plan</h2>
+            </div>
+            <div class="circle">0</div>
+            <div class="content">
+                <p><strong>Price:</strong> ₹0</p>
+                <p><strong>Free Pack</strong> - Download 5 posts</p>
+                <p>1 Installment for 1 Month</p>
+                <p>1 Month <a href="https://www.walstartechnologies.com/" class="styled-link">walstartechnologies.com</a></p>
+                @if (isset($subscription) && $subscription)
+                    <a href="#" class="buy-button btn btn-primary already-subscribed">SUBSCRIBED</a>
+                @else
+                    <a href="/plans/scannerForm?plan=free" class="buy-button btn btn-primary">GET STARTED</a>
+                @endif
+            </div>
+        </div>
+
                 <!-- Three Months Pack -->
         <div class="card m-2">
             <div class="header">
@@ -29,7 +48,7 @@
             </div>
         </div>
         <!-- Six Months Pack -->
-        <div class="card m-2">
+        <div class="card m-2 d-none">
             <div class="header">
                 <h2 class="mb-5">Six Months Pack</h2>
             </div>

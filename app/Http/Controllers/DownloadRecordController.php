@@ -31,13 +31,19 @@ class DownloadRecordController extends Controller
         $userId = $request->input('user_id');
         
         // Fetch the user's subscription
-        $subscription = Subscription::where('user_id', $userId)->first();
+        $subscription = Subscription::where('user_id', $userId)->latest()->first();
         $isAdmin = auth()->user()->role_id == 1;
         if(!$isAdmin){
-            $transaction = TransactionDetail::where('user_id', $userId)->first();
+            $transaction = TransactionDetail::where('user_id', $userId)->latest()->first();
 
             // Check if the transaction exists and its status
             if ($transaction) {
+                if($transaction->status == '0' && Carbon::now()->gt($transaction->plan_expiry_date)){
+                    return response()->json([
+                        'subscriptionOver' => true,
+                        'redirectUrl' => url('/plans')
+                    ]);
+                }
                 if ($transaction->status == '0') {
                     return response()->json([
                         'transactionLimita' => true,
@@ -74,17 +80,25 @@ class DownloadRecordController extends Controller
             //         'redirectUrl' => url('/choose-plan')
             //     ]);
             // }
-            
-            // Check the download limit
-            // $downloadLimit = $subscription->subscription_type === 'free' ? 150 : PHP_INT_MAX;
-            // $downloadCount = DownloadRecord::where('user_id', $userId)->count();
-            
-            // $exceededLimit = $downloadCount >= $downloadLimit;
 
-            // return response()->json([
-            //     'exceededLimit' => $exceededLimit,
-            //     'redirectUrl' => $exceededLimit ? url('/choose-plan') : null
-            // ]);
+            if($transaction->subscription_type === 'free'){
+                $downloadLimit = $transaction->subscription_type === 'free' ? 5 : PHP_INT_MAX;
+                $downloadCount = DownloadRecord::where('user_id', $userId)->count();
+                if($downloadCount == '4'){
+                    TransactionDetail::where('user_id', auth()->id())
+                    ->where('subscription_type', 'free')
+                    ->update([
+                        'status' => 0,
+                        'plan_expiry_date' => now(),
+                    ]);
+                }
+                if($downloadCount >= $downloadLimit){
+                    return response()->json([
+                        'subscriptionOver' => true,
+                        'redirectUrl' => url('/plans')
+                    ]);
+                }
+            }
         }
     }
 

@@ -13,6 +13,11 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         // $schedule->command('inspire')->hourly();
+        // $schedule->command('subscriptions:check-expired')->everyMinute();
+        // $schedule->command('subscriptions:check-ending-soon')->daily();
+        $schedule->command('subscriptions:check-expired')->everyMinute()->appendOutputTo(storage_path('logs/subscription_expired.log'));
+        $schedule->command('subscriptions:check-ending-soon')->everyMinute()->appendOutputTo(storage_path('logs/subscription_ending_soon.log'));
+        $schedule->command('subscriptions:deactivate-expired')->daily();
     }
 
     /**

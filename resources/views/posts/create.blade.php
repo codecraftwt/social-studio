@@ -125,18 +125,18 @@
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="input-box">
-                        <label for="header_color" class="form-label">Header Color</label>
+                    <div class="input-box3">
                         <input type="color" id="header_color" name="header_color" value="{{ old('header_color', '#ffffff') }}" />
+                        <label for="header_color" class="form-label">Header Color</label>
                         @error('header_color')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="input-box">
-                        <label for="text_color" class="form-label">Header Text Color</label>
+                    <div class="input-box3">
                         <input type="color" id="text_color" name="text_color" value="{{ old('text_color', '#ffffff') }}" />
+                        <label for="text_color" class="form-label">Header Text Color</label>
                         @error('text_color')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror

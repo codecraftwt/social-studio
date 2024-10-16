@@ -12,7 +12,7 @@
                 <div class="input-box">
                     <span class="icon"><i class='bx bx-user'></i></span>
                     <input id="name" type="text" class="@error('name') is-invalid @enderror" name="name" value="{{ old('name') }}" required autocomplete="name" autofocus>
-                    <label for="name">Name</label>
+                    <label for="name">Company Name</label>
                     @error('name')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror

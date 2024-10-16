@@ -14,7 +14,6 @@ class TransactionController extends Controller
     public function index()
     {
         TransactionDetail::where('is_read', 0)->update(['is_read' => 1]);
-        // $transactions = TransactionDetail::all(); // Fetch all transactions
         $transactions = TransactionDetail::orderBy('created_at', 'desc')->get(); 
         return view('transactions.index', compact('transactions'));
     }
@@ -25,21 +24,15 @@ class TransactionController extends Controller
         return view('transactions.user_index', compact('transactions'));
     }
 
-    // public function approve($id)
-    // {
-    //     $transaction = TransactionDetail::findOrFail($id);
-    //     $transaction->status = 1; // Assuming 1 means approved
-    //     $transaction->save();
-
-    //     return response()->json(['success' => true]);
-    // }
-
     public function approve($id)
     {
         $transaction = TransactionDetail::findOrFail($id);
         $transaction->status = 1;
 
         switch ($transaction->subscription_type) {
+            case 'free':
+                $transaction->plan_expiry_date = Carbon::now()->addMonths(1);
+                break;
             case 'three_months':
                 $transaction->plan_expiry_date = Carbon::now()->addMonths(3);
                 break;
@@ -82,14 +75,6 @@ class TransactionController extends Controller
         return response()->json(['success' => true]);
     }
 
-    // public function bulkApprove(Request $request)
-    // {
-    //     $transactionIds = $request->input('transactions', []);
-    //     TransactionDetail::whereIn('id', $transactionIds)->update(['status' => 1]); // Assuming 1 means approved
-
-    //     return redirect()->back()->with('success', 'Transactions approved successfully.');
-    // }
-
     public function bulkApprove(Request $request)
     {
         $transactionIds = $request->input('transactions', []);
@@ -100,7 +85,6 @@ class TransactionController extends Controller
         // Update the status
         TransactionDetail::whereIn('id', $transactionIds)->update(['status' => 1]); // Assuming 1 means approved
 
-        // Notify each user associated with the transactions
         foreach ($transactions as $transaction) {
             $user = $transaction->user; // Assuming the relationship exists
             if ($user) {
@@ -129,13 +113,6 @@ class TransactionController extends Controller
         }
     }
 
-    // public function bulkDelete(Request $request)
-    // {
-    //     $transactionIds = $request->input('transactions', []);
-    //     TransactionDetail::destroy($transactionIds);
-
-    //     return redirect()->back()->with('success', 'Transactions deleted successfully.');
-    // }
 
     public function bulkDelete(Request $request)
     {

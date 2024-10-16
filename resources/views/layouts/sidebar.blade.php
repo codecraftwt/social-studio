@@ -23,7 +23,7 @@
                         <span class="sidebar-text">Categories</span>
                         <i class="bi bi-caret-down-fill ms-2" style="padding-left: 60px;"></i>
                     </a>
-                    <div class="collapse nav flex-column {{ request()->routeIs('categories.*') || request()->routeIs('subcategories.*') ? 'show' : '' }}" id="categoriesSubmenu">
+                    <div class="collapse nav mt-1 flex-column {{ request()->routeIs('categories.*') || request()->routeIs('subcategories.*') ? 'show' : '' }}" id="categoriesSubmenu">
                         <ul class="nav flex-column">
                             <li class="nav-item">
                                 <a class="nav-link {{ request()->routeIs('categories.create') ? 'active' : '' }}" href="{{ route('categories.create') }}">
@@ -52,7 +52,7 @@
                         <span class="sidebar-text">Posts</span>
                         <i class="bi bi-caret-down-fill ms-2" style="padding-left: 94px;"></i>
                     </a>
-                    <div class="collapse nav flex-column {{ request()->routeIs('posts.*') ? 'show' : '' }}" id="postsSubmenu">
+                    <div class="collapse nav flex-column mt-1 {{ request()->routeIs('posts.*') ? 'show' : '' }}" id="postsSubmenu">
                         <ul class="nav flex-column ">
                             <li class="nav-item">
                                 <a class="nav-link {{ request()->routeIs('posts.create') ? 'active' : '' }}" href="{{ route('posts.create') }}">
@@ -75,7 +75,7 @@
                         <span class="sidebar-text">User</span>
                         <i class="bi bi-caret-down-fill ms-2" style="padding-left: 100px;"></i>
                     </a>
-                    <div class="collapse nav flex-column {{ request()->routeIs('users.*') ? 'show' : '' }}" id="userSubMenu">
+                    <div class="collapse nav mt-1 flex-column {{ request()->routeIs('users.*') ? 'show' : '' }}" id="userSubMenu">
                         <ul class="nav flex-column">
                             <li class="nav-item">
                                 <a class="nav-link {{ request()->routeIs('users.create') ? 'active' : '' }}" href="{{ route('users.create') }}">
@@ -100,8 +100,8 @@
                 </li>
             @endif
 
-        <li class="nav-item">
-            <a class="nav-link d-flex {{ request()->routeIs('header.create') ? 'active' : '' }}" href="{{ route('header.create')}}">
+        <li class="nav-item d-none">
+            <a class="nav-link d-flex " href="">
                 <i class="bi bi-pencil-square me-2"></i>
                 <span class="sidebar-text">Create Header/Footer</span>
             </a>

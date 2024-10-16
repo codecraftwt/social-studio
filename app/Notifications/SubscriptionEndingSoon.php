@@ -7,16 +7,16 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class WelcomeEmailNotification extends Notification
+class SubscriptionEndingSoon extends Notification
 {
     use Queueable;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct()
+    public function __construct($transaction)
     {
-        //
+        $this->transaction = $transaction;
     }
 
     /**
@@ -34,13 +34,14 @@ class WelcomeEmailNotification extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
+        $expiryDate = \Carbon\Carbon::parse($this->transaction->plan_expiry_date);
+    
         return (new MailMessage)
-            ->subject('Welcome to Our Walstar Social!')
+            ->subject('Your Subscription is Ending Soon')
             ->greeting('Hello, ' . $notifiable->name . '!')
-            ->line('Thank you for registering with us. We are excited to have you on board!')
-            ->action('Visit Dashboard', url('/dashboard'));
-            // ->line('Best Regards,')
-            // ->line('Walstar Poster');
+            ->line('Your subscription for ' . $this->transaction->subscription_type . ' will expire on ' . $expiryDate->format('Y-m-d') . '. Please consider renewing it.')
+            ->action('Renew Subscription', url('/renew'))
+            ->line('Thank you for being with us!');
     }
 
     /**

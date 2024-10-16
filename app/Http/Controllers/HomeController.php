@@ -99,7 +99,16 @@ class HomeController extends Controller
              ->get();
     
             $headerFooter = HeaderFooter::where('user_id', $userId)->first();
-    
+            // foreach ($posts as $post) {
+            //     $imagePath = storage_path('app/public/' . $post->post_image);
+            //     if (file_exists($imagePath)) {
+            //         $imageData = base64_encode(file_get_contents($imagePath));
+            //         $imageType = pathinfo($imagePath, PATHINFO_EXTENSION);
+            //         $post->base64_image = "data:image/{$imageType};base64,{$imageData}";
+            //     } else {
+            //         $post->base64_image = null; // Handle missing image
+            //     }
+            // }
             return response()->json([
                 'posts' => $posts,
                 'headerPath' => $headerFooter ? $headerFooter->header_path : null,

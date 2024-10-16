@@ -40,6 +40,11 @@
                     <li class="list-group-item"><strong>Bank Name:</strong> {{ $accountDetails->bank_name }}</li>
                 </ul>
             </div>
+            @if ($accountDetails->account_name === 'N/A')
+                <div class="alert alert-warning text-center">
+                    No account details available.
+                </div>
+            @endif
         </div>
     </div>
 

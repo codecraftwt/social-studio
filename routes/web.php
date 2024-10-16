@@ -34,7 +34,7 @@ Route::get('/', function () {
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Auth::routes();
 
-Route::get('/dashboard', [App\Http\Controllers\HomeController::class, 'dashboard'])->name('dashboard');
+// Route::get('/dashboard', [App\Http\Controllers\HomeController::class, 'dashboard'])->name('dashboard');
 Route::get('/subcategories/{category}', [App\Http\Controllers\HomeController::class, 'getSubCategories']);
 Route::get('/posts/by-category', [HomeController::class, 'getPostsByCategory'])->name('posts.byCategory');
 // Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
@@ -45,6 +45,7 @@ Route::get('/posts/by-category', [HomeController::class, 'getPostsByCategory'])-
 // Route::post('posts/bulk-delete', [PostController::class, 'bulkDelete'])->name('posts.bulkDelete');
 
 Route::group(['middleware' => 'admin'], function () {
+    Route::get('/dashboard', [App\Http\Controllers\HomeController::class, 'dashboard'])->name('dashboard');
     Route::resource('categories', CategoryController::class);
     Route::put('categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
     Route::post('/categories/bulkDelete', [CategoryController::class, 'bulkDelete'])->name('categories.bulkDelete');
@@ -98,7 +99,7 @@ Route::group(['prefix' => 'subcategories', 'as' => 'subcategories.'], function()
 });
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/header/create', [HeaderController::class, 'create'])->name('header.create');
+    // Route::get('/header/create', [HeaderController::class, 'create'])->name('header.create');
     Route::post('/header/save', [HeaderController::class, 'save'])->name('header.save');
     Route::post('/header/saveFooter', [HeaderController::class, 'saveFooter'])->name('header.saveFooter');
     Route::get('/plans', [PlanController::class, 'showPlans'])->name('plans');

@@ -1,7 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
-
+@php
+use Carbon\Carbon;
+@endphp
 <div class="container mt-5">
     <h1 class="mb-4">Transaction Details</h1>
 
@@ -25,7 +27,7 @@
             <tbody>
                 @foreach ($transactions as $transaction)
                     <tr>
-                        <td><input type="checkbox" name="transactions[]" value="{{ $transaction->id }}"></td>
+                        <td> @if ($transaction->subscription_type !== 'free')<input type="checkbox" name="transactions[]" value="{{ $transaction->id }}">@endif</td>
                         <td>{{ $transaction->id }}</td>
                         <td>{{ $transaction->user_id }}</td>
                         <td>{{ $transaction->transaction_id }}</td>
@@ -39,9 +41,24 @@
                                 N/A
                             @endif
                         </td>
-                        <td>{{ $transaction->status == 1 ? 'Approved' : 'Pending' }}</td>
+                        <!-- <td>{{ $transaction->status == 1 ? 'Approved' : 'Pending' }}</td> -->
                         <td>
-                            @if ($transaction->status == 0)
+                            @if ($transaction->subscription_type === 'free')
+                                <span class="text-secondary">Free Type</span>
+                            @elseif ($transaction->status == 0 && $transaction->plan_expiry_date && Carbon::parse($transaction->plan_expiry_date)->isPast())
+                                <span class="text-secondary">Expired</span>
+                            @elseif ($transaction->status == 1)
+                                <span class="text-success">Approved</span>
+                            @else
+                                <span class="text-warning">Pending</span>
+                            @endif
+                        </td>
+                        <td>
+                            @if ($transaction->subscription_type === 'free')
+                                <button type="button" class="btn btn-secondary btn-sm" disabled>Free</button>
+                            @elseif ($transaction->status == 0 && $transaction->plan_expiry_date && Carbon::parse($transaction->plan_expiry_date)->isPast())
+                                <button type="button" class="btn btn-secondary btn-sm" disabled>Expired</button>
+                            @elseif ($transaction->status == 0)
                                 <button type="button" class="btn btn-success btn-sm approve-btn" data-id="{{ $transaction->id }}">Approve</button>
                             @else
                                 <button type="button" class="btn btn-danger btn-sm reject-btn" data-id="{{ $transaction->id }}">Reject</button>
@@ -215,7 +232,8 @@ $(document).ready(function() {
             if (result.isConfirmed) {
                 // AJAX request to delete the selected transactions
                 $.ajax({
-                    url: $('#bulkDeleteForm').attr('action'), // Use the form's action URL
+                    // url: $('#bulkDeleteForm').attr('action'), // Use the form's action URL
+                    url: '/transactions/bulk-delete',
                     type: 'POST',
                     data: {
                         _token: '{{ csrf_token() }}', // Add CSRF token for security

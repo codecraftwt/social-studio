@@ -92,6 +92,15 @@
                         </div>
 
                         <div class="input-box">
+                            <span class="icon"><i class='bx bx-home'></i></span>
+                            <input type="text" name="current_location" value="{{ Auth::user()->current_location }}" required autocomplete="current_location" class="@error('current_location') is-invalid @enderror">
+                            <label>Current Location</label>
+                            @error('current_location')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="input-box">
                             <span class="icon"><i class='bx bx-phone'></i></span>
                             <input type="text" name="mobile" value="{{ Auth::user()->mobile }}" required autocomplete="mobile" class="@error('mobile') is-invalid @enderror">
                             <label>Mobile</label>

@@ -7,16 +7,18 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class WelcomeEmailNotification extends Notification
+class SubscriptionExpired extends Notification
 {
     use Queueable;
+
+    protected $transaction;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct()
+    public function __construct($transaction)
     {
-        //
+        $this->transaction = $transaction;
     }
 
     /**
@@ -35,12 +37,11 @@ class WelcomeEmailNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Welcome to Our Walstar Social!')
+            ->subject('Your Subscription Has Expired')
             ->greeting('Hello, ' . $notifiable->name . '!')
-            ->line('Thank you for registering with us. We are excited to have you on board!')
-            ->action('Visit Dashboard', url('/dashboard'));
-            // ->line('Best Regards,')
-            // ->line('Walstar Poster');
+            ->line('Your subscription for ' . $this->transaction->subscription_type . ' has expired on ' . $this->transaction->plan_expiry_date . '.')
+            ->action('Renew Subscription', url('/renew'))
+            ->line('Thank you for being with us!');
     }
 
     /**
@@ -51,7 +52,8 @@ class WelcomeEmailNotification extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            //
+            // Additional data if needed
         ];
     }
 }
+

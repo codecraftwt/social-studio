@@ -51,13 +51,13 @@
         @guest
                 @include('layouts.header')
         @endguest
-        @if(request()->is('plans') || request()->is('plans/create') || request()->is('plans/scannerForm') || request()->is('user-transactions') || request()->is('custom-image'))
+        @if(request()->is('plans') || request()->is('plans/create') || request()->is('plans/scannerForm') || request()->is('user-transactions') || request()->is('custom-image') || request()->is('profile/profile'))
             @include('layouts.header')
         @endif
         <div class="d-flex flex-grow-1">
             <!-- Sidebar -->
             @auth
-                @if(auth()->user() && !request()->is('plans') && !request()->is('plans/create') && !request()->is('plans/scannerForm') && !request()->is('user-transactions') && !request()->is('custom-image'))
+                @if(auth()->user() && !request()->is('plans') && !request()->is('plans/create') && !request()->is('plans/scannerForm') && !request()->is('user-transactions') && !request()->is('custom-image')  && auth()->user()->isAdmin())
                     @include('layouts.sidebar')
                 @endif
             @endauth
@@ -65,7 +65,7 @@
             <!-- Main Content -->
             <main class="flex-grow-1 p-3">
             @auth
-               @if(auth()->user() && !request()->is('plans') && !request()->is('plans/scannerForm') && !request()->is('plans/create') && !request()->is('user-transactions') && !request()->is('custom-image'))
+               @if(auth()->user() && !request()->is('plans') && !request()->is('plans/scannerForm') && !request()->is('plans/create') && !request()->is('user-transactions') && !request()->is('custom-image') && (!request()->is('profile/profile') && auth()->user()->isAdmin()))
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <button class="btn btn-light me-2" id="toggleSidebardesktop">
                             <i class="bi bi-list"></i>
@@ -228,6 +228,15 @@
                                             <input type="text" name="address" value="{{ Auth::user()->address }}" required autocomplete="address" class="@error('address') is-invalid @enderror">
                                             <label>Address</label>
                                             @error('address')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+
+                                        <div class="input-box">
+                                            <span class="icon"><i class='bx bx-home'></i></span>
+                                            <input type="text" name="current_location" value="{{ Auth::user()->current_location }}" required autocomplete="current_location" class="@error('current_location') is-invalid @enderror">
+                                            <label>Current Location</label>
+                                            @error('current_location')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
                                         </div>

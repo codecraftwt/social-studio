@@ -165,7 +165,7 @@
                                 <div class="post-item link_a d-none">
                                     <div id="link-content"></div> <!-- For displaying links -->
                                 </div>
-                                <div class="post-item empty_a d-none">No content available</div>
+                                <div class="post-item empty_a d-none">No posts available.</div>
                             </div>
                         </div>
                     </div>
@@ -180,7 +180,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <img id="full-image" src="" alt="full-image class="img-fluid">
+                        <img id="full-image" src="" class="poster_image" alt="full-image" class="img-fluid">
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -200,7 +200,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" id="downloadButton" class="btn btn-primary">Download</button>
+                        <button type="button" id="downloadButton" class="btn btn-primary btn-log">Download</button>
                     </div>
                 </div>
             </div>
@@ -316,7 +316,7 @@
                                 $('#poster-content').append(`
                                     <div class="col-md-4 mb-4"> <!-- Use Bootstrap's grid system -->
                                         <div class="card">
-                                            <img src="{{ asset('storage') }}/${post.post_image}" alt="${post.post_title}" class="card-img-top poster-image" style="width: 100%; height: auto;">
+                                            <img src="{{ asset('storage') }}/${post.post_image}" alt="${post.post_title}" class="card-img-top poster-image poster_image" style="width: 100%; height: auto;" draggable="false">
                                             <div class="card-body">
                                                 <button type="button" class="btn btn-log btn-primary download-btn" 
                                                     data-image="{{ asset('storage') }}/${post.post_image}" 
@@ -384,14 +384,17 @@
                     }
                 });
             });
-            $(document).on('click', '.poster-image', function() {
-                var imgSrc = $(this).attr('src');
-                var title = $(this).siblings('.card-body').find('.card-title').text();
+            var isLoggedIn = {!! json_encode(auth()->check()) !!};
+            if (isLoggedIn) {
+                $(document).on('click', '.poster-image', function() {
+                    var imgSrc = $(this).attr('src');
+                    var title = $(this).siblings('.card-body').find('.card-title').text();
 
-                $('#full-image').attr('src', imgSrc);
-                $('#fullImageModalLabel').text(title);
-                $('#fullImageModal').modal('show'); 
-            });
+                    $('#full-image').attr('src', imgSrc);
+                    $('#fullImageModalLabel').text(title);
+                    $('#fullImageModal').modal('show'); 
+                });
+            }
             $(document).on('click', '.download-btn', function(e) {
                 e.preventDefault();
                 var imageUrl = $(this).data('image');
@@ -401,7 +404,11 @@
                 createAndDownloadImage(imageUrl, postId);
             });
         });
-
+        document.addEventListener('contextmenu', function(e) {
+            if (e.target.classList.contains('poster_image')) {
+                e.preventDefault();
+            }
+        });
         $(document).on('click', '.download-pdf-btn', async function(e) {
             e.preventDefault();
             var pdfUrl = $(this).data('pdf');
@@ -508,19 +515,38 @@
 
             if (!isLoggedIn) {
                 Swal.fire({
-                title: 'Error!',
-                text: 'You need to be logged in to download this post.',
-                icon: 'warning',
-                showCancelButton: false,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Go to Login'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location.href = '/login';
-                }
-            });
-            return null;
+                    title: 'Error!',
+                    text: 'You need to be logged in to download this post.',
+                    icon: 'warning',
+                    showCancelButton: false,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Go to Login'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = '/login';
+                    }
+                });
+                return null;
+                // Swal.fire({
+                //     title: 'Download Image',
+                //     text: 'You are not logged in. Would you like to download the image anyway?',
+                //     icon: 'warning',
+                //     showCancelButton: true,
+                //     confirmButtonColor: '#3085d6',
+                //     cancelButtonColor: '#d33',
+                //     confirmButtonText: 'Download Image',
+                //     cancelButtonText: 'Go to Login'
+                // }).then((result) => {
+                //     if (result.isConfirmed) {
+                //         // Trigger image download
+                //         downloadImage(imageUrl);
+                //     } else {
+                //         // Redirect to login
+                //         window.location.href = '/login';
+                //     }
+                // });
+                // return null;
             }
             const userDetails = await fetchUserDetails();
             if (!userDetails) {
@@ -689,7 +715,14 @@
                         .then(data => {
                             const subcategoriesList = document.getElementById('subcategories-list');
                             subcategoriesList.innerHTML = '';
+                            if (!Array.isArray(data) || data.length === 0) {
+                                document.querySelector('.post-item.empty_a').classList.remove('d-none'); 
+                                document.getElementById('posts-content').classList.add('d-none'); 
+                                document.querySelector('.post-item.poster_a').classList.add('d-none'); 
+                                return; 
+                            }
 
+                            document.querySelector('.post-item.empty_a').classList.add('d-none');
                             data.forEach((subcategory, index) => {
                                 const li = document.createElement('li');
                                 li.classList.add('mb-3');
@@ -720,6 +753,45 @@
                 });
             });
         });
+        
+        function downloadImage(imageUrl) {
+            const currentUrl = window.location.href;
+
+            const img = new Image();
+            img.crossOrigin = "Anonymous"; 
+            img.src = imageUrl;
+
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                ctx.drawImage(img, 0, 0);
+                const stripHeight = 50; 
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.5)'; 
+                ctx.fillRect(0, (canvas.height - stripHeight) / 2, canvas.width, stripHeight);
+
+                ctx.font = '20px Arial';
+                ctx.fillStyle = 'white';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+
+                ctx.fillText(currentUrl, canvas.width / 2, canvas.height / 2);
+
+                canvas.toBlob((blob) => {
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = 'downloaded_image.png';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }, 'image/png');
+            };
+
+            img.onerror = (err) => {
+                console.error('Failed to load image:', err);
+            };
+        }
 
 
         document.addEventListener('DOMContentLoaded', function() {

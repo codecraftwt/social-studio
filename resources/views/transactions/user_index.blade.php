@@ -1,7 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
-
+@php
+use Carbon\Carbon;
+@endphp
 <div class="wrapper">
     <div class="container mt-5 content">
         <h1 class="mb-4">Transaction Details</h1>
@@ -42,7 +44,16 @@
                                     N/A
                                 @endif
                             </td>
-                            <td>{{ $transaction->status == 1 ? 'Approved' : 'Pending' }}</td>
+                            <!-- <td>{{ $transaction->status == 1 ? 'Approved' : 'Pending' }}</td> -->
+                            <td>
+                                @if ($transaction->status == 0 && $transaction->plan_expiry_date && Carbon::parse($transaction->plan_expiry_date)->isPast())
+                                    <span class="text-secondary">Expired</span>
+                                @elseif ($transaction->status == 1)
+                                    <span class="text-success">Approved</span>
+                                @else
+                                    <span class="text-warning">Pending</span>
+                                @endif
+                            </td>
                             @if (auth()->user()->isAdmin())
                                 <td>
                                     @if ($transaction->status == 0)
