@@ -312,62 +312,70 @@ document.addEventListener('DOMContentLoaded', function () {
                 confirmButtonColor: '#3085d6',
                 confirmButtonText: 'OK'
             });
-        }
-
-        Swal.fire({
-            title: 'Are you sure?',
-            text: 'Do you really want to delete the selected users?',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Yes, delete them!',
-            cancelButtonText: 'No, cancel!',
-        }).then((result) => {
-            if (result.isConfirmed) {
-                fetch('/users/bulk-delete', {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}', // Laravel CSRF token
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ user_ids: selectedUsers }) // Send selected user IDs
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.success) {
-                        // If deletion is successful, refresh the page or update the UI
-                        window.location.reload(); // Refresh the page
-                    } else {
-                        // Handle the error case if deletion was not successful
+        }else{
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'Do you really want to delete the selected users?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete them!',
+                cancelButtonText: 'No, cancel!',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch('/users/bulk-delete', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}', // Laravel CSRF token
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ user_ids: selectedUsers }) // Send selected user IDs
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                title: 'Deleted!',
+                                text: 'The selected users have been deleted successfully.',
+                                icon: 'success',
+                                confirmButtonColor: '#3085d6',
+                                confirmButtonText: 'OK'
+                            }).then(() => {
+                                // Refresh the page or update the UI
+                                window.location.reload(); // Refresh the page
+                            });
+                        } else {
+                            // Handle the error case if deletion was not successful
+                            Swal.fire({
+                                title: 'Error!',
+                                text: 'Internal Server Error Occurred.',
+                                icon: 'error',
+                                confirmButtonColor: '#d33',
+                                confirmButtonText: 'OK'
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
                         Swal.fire({
                             title: 'Error!',
-                            text: 'Internal Server Error Occurred.',
+                            text: 'An unexpected error occurred. Please try again later.',
                             icon: 'error',
                             confirmButtonColor: '#d33',
                             confirmButtonText: 'OK'
                         });
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    Swal.fire({
-                        title: 'Error!',
-                        text: 'An unexpected error occurred. Please try again later.',
-                        icon: 'error',
-                        confirmButtonColor: '#d33',
-                        confirmButtonText: 'OK'
                     });
-                });
-            } else {
-                console.log('Deletion canceled');
-            }
-        });
+                } else {
+                    console.log('Deletion canceled');
+                }
+            });
+        }
     });
 });
 
@@ -424,20 +432,30 @@ $(document).ready(function() {
                 confirmButtonColor: '#3085d6',
                 confirmButtonText: 'OK'
             });
-        }
-
-        $.ajax({
-            url: '{{ route("users.bulkActivate") }}',
-            type: 'POST',
-            data: {
-                user_ids: selectedUsers,
-                _token: '{{ csrf_token() }}'
-            },
-            success: function(response) {
-                if (response.success) {
-                    location.reload(); 
-                } else {
-                    // alert('Failed to activate users.');
+        }else{
+            $.ajax({
+                url: '{{ route("users.bulkActivate") }}',
+                type: 'POST',
+                data: {
+                    user_ids: selectedUsers,
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        location.reload(); 
+                    } else {
+                        // alert('Failed to activate users.');
+                        Swal.fire({
+                            title: 'Error!',
+                            text: 'Internal Server Error Occured.',
+                            icon: 'error',
+                            confirmButtonColor: '#d33',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                },
+                error: function(xhr) {
+                    // alert('An error occurred: ' + xhr.responseJSON.message);
                     Swal.fire({
                         title: 'Error!',
                         text: 'Internal Server Error Occured.',
@@ -446,18 +464,8 @@ $(document).ready(function() {
                         confirmButtonText: 'OK'
                     });
                 }
-            },
-            error: function(xhr) {
-                // alert('An error occurred: ' + xhr.responseJSON.message);
-                Swal.fire({
-                    title: 'Error!',
-                    text: 'Internal Server Error Occured.',
-                    icon: 'error',
-                    confirmButtonColor: '#d33',
-                    confirmButtonText: 'OK'
-                });
-            }
-        });
+            });
+        }
     });
 
     $('#bulk-deactivate').click(function() {
@@ -473,20 +481,30 @@ $(document).ready(function() {
                 confirmButtonColor: '#3085d6',
                 confirmButtonText: 'OK'
             });
-        }
-
-        $.ajax({
-            url: '{{ route("users.bulkDeactivate") }}',
-            type: 'POST',
-            data: {
-                user_ids: selectedUsers,
-                _token: '{{ csrf_token() }}'
-            },
-            success: function(response) {
-                if (response.success) {
-                    location.reload(); 
-                } else {
-                    // alert('Failed to deactivate users.');
+        }else{
+            $.ajax({
+                url: '{{ route("users.bulkDeactivate") }}',
+                type: 'POST',
+                data: {
+                    user_ids: selectedUsers,
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        location.reload(); 
+                    } else {
+                        // alert('Failed to deactivate users.');
+                        Swal.fire({
+                            title: 'Error!',
+                            text: 'Internal Server Error Occured.',
+                            icon: 'error',
+                            confirmButtonColor: '#d33',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                },
+                error: function(xhr) {
+                    // alert('An error occurred: ' + xhr.responseJSON.message);
                     Swal.fire({
                         title: 'Error!',
                         text: 'Internal Server Error Occured.',
@@ -495,18 +513,8 @@ $(document).ready(function() {
                         confirmButtonText: 'OK'
                     });
                 }
-            },
-            error: function(xhr) {
-                // alert('An error occurred: ' + xhr.responseJSON.message);
-                Swal.fire({
-                    title: 'Error!',
-                    text: 'Internal Server Error Occured.',
-                    icon: 'error',
-                    confirmButtonColor: '#d33',
-                    confirmButtonText: 'OK'
-                });
-            }
-        });
+            });
+        }
     });
 });
 

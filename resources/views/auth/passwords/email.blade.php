@@ -25,4 +25,14 @@
         </div>
     </div>
 </div>
+@if (session('status'))
+<script>
+    Swal.fire({
+        icon: 'success',
+        title: 'Success',
+        text: '{{ session('status') }}',
+        confirmButtonText: 'Okay'
+    });
+</script>
+@endif
 @endsection

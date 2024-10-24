@@ -69,9 +69,15 @@
                     <label for="current_location">Current Location</label>
                 </div>
 
-                <div class="input-box">
+                <!-- <div class="input-box">
                     <span class="icon"><i class='bx bx-phone'></i></span>
                     <input id="mobile" type="text" name="mobile" value="{{ old('mobile') }}" required>
+                    <label for="mobile">Mobile No.</label>
+                </div> -->
+
+                <div class="input-box">
+                    <span class="icon"><i class='bx bx-phone'></i></span>
+                    <input id="mobile" type="text" name="mobile" value="{{ old('mobile') }}" required pattern="^\+91[0-9]{10}$" title="Please enter a valid Indian mobile number starting with +91 and followed by 10 digits">
                     <label for="mobile">Mobile No.</label>
                 </div>
 

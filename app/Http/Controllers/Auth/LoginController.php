@@ -51,9 +51,11 @@ class LoginController extends Controller
             ]);
         }
         session()->flash('success', 'Login successful! Welcome back, ' . $user->name . '!');
+        $remember = $request->has('remember');
+        Auth::login($user, $remember);
         if ($user->isAdmin()) { // Assuming you have an isAdmin method or a role field
             return redirect()->route('dashboard'); // Adjust the route name as necessary
         }
-
+        return redirect()->route('home');
     }
 }

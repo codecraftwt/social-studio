@@ -71,9 +71,9 @@ body {
     border-radius: 4px;
 }
 
-.containerb .form-group input[type="number"] {
-    -moz-appearance: textfield; /* Remove spin buttons in Firefox */
-}
+/* .containerb .form-group input[type="number"] {
+    -moz-appearance: textfield; 
+} */
 
 .containerb .form-group input[type="color"] {
     padding: 0;
@@ -318,6 +318,17 @@ body {
     left: 50%;
     transform: translate(-50%, 0); /* Center the image */
     min-width: 100%; /* Ensure the image covers the width */
+}
+
+@media (max-width: 768px) { /* Adjust max-width as needed */
+    .custom-home-page .image-crop {
+        height: 300px; /* Set a specific height for mobile */
+    }
+
+    .custom-home-page .image-crop img {
+        top: -125; /* Adjust positioning for better visibility */
+        min-width: 227%; /* Ensure the image covers the width */
+    }
 }
 
 .custom-home-page .overlay {
@@ -1004,4 +1015,42 @@ h1 {
 
 .input-box:last-child {
     margin-right: 0;
+}
+.pagination-controls {
+    display: flex;
+    justify-content: flex-end; /* Aligns buttons to the right */
+    margin-top: 20px; /* Adds space above the buttons */
+}
+
+.pagination-controls button {
+    background-color: #007bff; /* Button background color */
+    color: white; /* Button text color */
+    border: none; /* Remove default border */
+    padding: 10px 15px; /* Padding for buttons */
+    margin-left: 10px; /* Space between buttons */
+    border-radius: 5px; /* Rounded corners */
+    cursor: pointer; /* Pointer on hover */
+    transition: background-color 0.3s; /* Smooth background color transition */
+}
+
+.pagination-controls button:disabled {
+    background-color: #cccccc; /* Disabled button color */
+    cursor: not-allowed; /* Not allowed cursor for disabled button */
+}
+
+.pagination-controls button:hover:not(:disabled) {
+    background-color: #0056b3; /* Darker shade on hover */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .pagination-controls {
+        display: contents;
+        align-items: flex-end;
+    }
+
+    .pagination-controls button {
+        margin-left: 0; /* Remove left margin in column layout */
+        margin-top: 10px; /* Space between stacked buttons */
+    }
 }

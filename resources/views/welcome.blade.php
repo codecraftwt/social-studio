@@ -85,7 +85,7 @@
             </div>
         </div>
 
-        <div class="category-section">
+        <!-- <div class="category-section">
             <div class="container">
                 <h2 class="category-section-header">Categories</h2>
                 <div class="category-container">
@@ -97,7 +97,25 @@
                     @endforeach
                 </div>
             </div>
+        </div> -->
+        <div class="category-section">
+    <div class="container">
+        <h2 class="category-section-header">Categories</h2>
+        <div class="category-container" id="category-container">
+            @foreach ($categories as $index => $category)
+                <div class="parent_category" data-id="{{ $category->id }}" role="button" aria-label="Select category: {{ $category->name }}" 
+                     style="display: {{ $index < 6 ? 'block' : 'none' }}">
+                    <img src="{{ asset('storage/' . ($category->category_image ?? 'images/images2.jpg')) }}" alt="{{ $category->name }}" class="category-image" />
+                    <h3 class="category-title">{{ $category->name }}</h3>
+                </div>
+            @endforeach
         </div>
+        <div class="pagination-controls">
+            <button id="prev-button" disabled>Previous</button>
+            <button id="next-button">Next</button>
+        </div>
+    </div>
+</div>
 
 
         <!-- Main Content -->
@@ -793,6 +811,36 @@
             };
         }
 
+        document.addEventListener('DOMContentLoaded', function() {
+            const categories = document.querySelectorAll('.parent_category');
+            const totalCategories = categories.length;
+            const itemsPerPage = 3;
+            let currentPage = 0;
+            
+            function updateDisplay() {
+                categories.forEach((category, index) => {
+                    category.style.display = (index >= currentPage * itemsPerPage && index < (currentPage + 1) * itemsPerPage) ? 'block' : 'none';
+                });
+                document.getElementById('prev-button').disabled = currentPage === 0;
+                document.getElementById('next-button').disabled = (currentPage + 1) * itemsPerPage >= totalCategories;
+            }
+
+            document.getElementById('prev-button').addEventListener('click', function() {
+                if (currentPage > 0) {
+                    currentPage--;
+                    updateDisplay();
+                }
+            });
+
+            document.getElementById('next-button').addEventListener('click', function() {
+                if ((currentPage + 1) * itemsPerPage < totalCategories) {
+                    currentPage++;
+                    updateDisplay();
+                }
+            });
+
+            updateDisplay(); // Initial call to display the first set of categories
+        });
 
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('select-free-plan').addEventListener('click', function(e) {

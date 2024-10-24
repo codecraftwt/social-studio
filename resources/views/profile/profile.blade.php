@@ -100,9 +100,19 @@
                             @enderror
                         </div>
 
-                        <div class="input-box">
+                        <!-- <div class="input-box">
                             <span class="icon"><i class='bx bx-phone'></i></span>
                             <input type="text" name="mobile" value="{{ Auth::user()->mobile }}" required autocomplete="mobile" class="@error('mobile') is-invalid @enderror">
+                            <label>Mobile</label>
+                            @error('mobile')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div> -->
+
+                        <div class="input-box">
+                            <span class="icon"><i class='bx bx-phone'></i></span>
+                            <input type="text" name="mobile" value="{{ Auth::user()->mobile }}" required autocomplete="mobile" class="@error('mobile') is-invalid @enderror" 
+                                pattern="^\+91[0-9]{10}$" title="Please enter a valid Indian mobile number starting with +91 and followed by 10 digits.">
                             <label>Mobile</label>
                             @error('mobile')
                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -130,4 +140,11 @@
     <footer class="footer text-center mt-5">
         <p class="mb-0 text-white">© 2024 Walstar. All Rights Reserved.</p>
     </footer>
+    <script>
+        var editProfileModal = document.getElementById('editProfileModal');
+
+        editProfileModal.addEventListener('hidden.bs.modal', function () {
+            document.getElementById('editProfileForm').reset();
+        });
+    </script>
 @endsection

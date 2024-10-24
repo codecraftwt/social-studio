@@ -34,7 +34,7 @@ class HomeController extends Controller
 
         if (auth()->check()) {
             // return view('home', compact('categories'));
-            $totalUsers = User::count();
+            $totalUsers = User::where('role_id', '!=', 1)->count();
             $totalCategories = Category::count();
             $totalPosts = Post::count();
             $SubCategory = SubCategory::count(); 

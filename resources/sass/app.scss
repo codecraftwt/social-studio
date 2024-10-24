@@ -1,12 +1,12 @@
 // Fonts
-@import url('https://fonts.bunny.net/css?family=Nunito');
 
-// Variables
-@import 'variables';
+@use '_variables' as *;
 
 // Bootstrap
-@import 'bootstrap/scss/bootstrap';
+// @import 'bootstrap/scss/bootstrap';
 
-@import 'layouts/sidebar.css';
+// @import 'layouts/sidebar.scss';
+@use 'layouts/sidebar' as *;
+@import url('https://fonts.bunny.net/css?family=Nunito');
 
 // @import 'welcome/welcome.css';

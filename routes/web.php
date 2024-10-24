@@ -15,7 +15,7 @@ use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\Transaction\TransactionController;
 use App\Http\Controllers\Plans\PlanController;
 use App\Http\Controllers\Manage_Account\AccountPaymentController;
-use App\Http\Controllers\customImage\CustomImageController;
+use App\Http\Controllers\CustomImage\CustomImageController;
 
 /*
 |--------------------------------------------------------------------------

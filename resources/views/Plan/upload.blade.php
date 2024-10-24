@@ -75,7 +75,10 @@
     document.addEventListener('DOMContentLoaded', function() {
         flatpickr("#payment_date", {
             dateFormat: "Y-m-d",
-            maxDate: "today" 
+            maxDate: "today",
+            onReady: function(selectedDates, dateStr, instance) {
+                instance.input.removeAttribute('readonly');
+            } 
         });
 
         const subscriptionType = document.getElementById('subscription_type');
