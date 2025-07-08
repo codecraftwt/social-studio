@@ -257,6 +257,7 @@
                     confirmButtonColor: '#3085d6',
                     confirmButtonText: 'OK'
                 });
+                return;
             }
 
             $.ajax({
@@ -296,6 +297,7 @@
                     confirmButtonColor: '#3085d6',
                     confirmButtonText: 'OK'
                 });
+                return;
             }
 
             $.ajax({
@@ -324,6 +326,20 @@
 });
 
 document.getElementById('bulkDeleteButton').addEventListener('click', function() {
+            var selectedCategories = $('input[name="categories[]"]:checked').map(function() {
+                return this.value;
+            }).get();
+
+            if (selectedCategories.length === 0) {
+                Swal.fire({
+                    title: 'Warning!',
+                    text: 'Please select at least one category to deactivate.',
+                    icon: 'warning',
+                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: 'OK'
+                });
+                return;
+            }
         Swal.fire({
             title: 'Are you sure?',
             text: 'Do you really want to delete the selected categories?',

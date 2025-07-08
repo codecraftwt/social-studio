@@ -427,7 +427,7 @@ $(document).ready(function() {
         if (selectedUsers.length === 0) {
             Swal.fire({
                 title: 'Warning',
-                text: 'Please select at least one user to delete.',
+                text: 'Please select at least one user to activate.',
                 icon: 'warning',
                 confirmButtonColor: '#3085d6',
                 confirmButtonText: 'OK'
@@ -476,7 +476,7 @@ $(document).ready(function() {
         if (selectedUsers.length === 0) {
             Swal.fire({
                 title: 'Warning',
-                text: 'Please select at least one user to delete.',
+                text: 'Please select at least one user to de-activate.',
                 icon: 'warning',
                 confirmButtonColor: '#3085d6',
                 confirmButtonText: 'OK'

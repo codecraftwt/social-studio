@@ -340,6 +340,7 @@
                     confirmButtonColor: '#3085d6',
                     confirmButtonText: 'OK'
                 });
+                return;
             }
 
             Swal.fire({
@@ -483,14 +484,15 @@
                 return this.value;
             }).get();
 
-            if (selectedposts.length === 0) {
+            if (selectedposts.length == 0) {
                 Swal.fire({
                     title: 'Warning',
-                    text: 'Please select at least one category to activate.',
+                    text: 'Please select at least one posts to activate.',
                     icon: 'warning',
                     confirmButtonColor: '#3085d6',
                     confirmButtonText: 'OK'
                 });
+                return;
             }
 
             $.ajax({
@@ -526,11 +528,12 @@
             if (selectedposts.length === 0) {
                 Swal.fire({
                     title: 'Warning',
-                    text: 'Please select at least one category to activate.',
+                    text: 'Please select at least one posts to activate.',
                     icon: 'warning',
                     confirmButtonColor: '#3085d6',
                     confirmButtonText: 'OK'
                 });
+                return;
             }
 
             $.ajax({

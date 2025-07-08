@@ -46,6 +46,12 @@
 
 <body>
     <div id="app" class="d-flex flex-column min-vh-100">
+    <div id="loader" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255, 255, 255, 0.8); z-index: 9999; text-align: center;">
+        <div class="spinner" style="margin-top: 20%;">
+            <div class="double-bounce1"></div>
+            <div class="double-bounce2"></div>
+        </div>
+    </div>
         <!-- Header -->
 
         @guest

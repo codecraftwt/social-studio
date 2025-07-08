@@ -88,6 +88,7 @@ $(document).ready(function() {
     // Approve button click
     $('.approve-btn').click(function() {
         const transactionId = $(this).data('id');
+        $('#loader').show();
         $.ajax({
             url: `/transactions/${transactionId}/approve`,
             method: 'POST',
@@ -116,6 +117,9 @@ $(document).ready(function() {
                     confirmButtonColor: '#d33',
                     confirmButtonText: 'OK'
                 });
+            },
+            complete: function() {
+                $('#loader').hide();
             }
         });
     });
@@ -123,6 +127,7 @@ $(document).ready(function() {
     // Reject button click
     $('.reject-btn').click(function() {
         const transactionId = $(this).data('id');
+        $('#loader').show();
         $.ajax({
             url: `/transactions/${transactionId}/reject`,
             method: 'POST',
@@ -131,9 +136,9 @@ $(document).ready(function() {
             },
             success: function(response) {
                 Swal.fire({
-                    title: 'Error',
+                    title: 'Success',
                     text: 'Transaction rejected!',
-                    icon: 'error',
+                    icon: 'success',
                     confirmButtonColor: '#d33',
                     confirmButtonText: 'OK'
                 }).then(() => {
@@ -149,6 +154,9 @@ $(document).ready(function() {
                     confirmButtonColor: '#d33',
                     confirmButtonText: 'OK'
                 });
+            },
+            complete: function() {
+                $('#loader').hide();
             }
         });
     });
